@@ -1,0 +1,251 @@
+<template>
+  <div class="min-h-screen bg-gray-900">
+    <!-- Article Header -->
+    <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Back Navigation -->
+      <div class="mb-8">
+        <NuxtLink 
+          to="/blog" 
+          class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Back to Blog
+        </NuxtLink>
+      </div>
+
+      <!-- Article Meta -->
+      <header class="mb-12">
+        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-6">
+          <time>{{ formatDate(data?.date) }}</time>
+          <span>•</span>
+          <span>{{ data?.readTime }} min read</span>
+          <span>•</span>
+          <div class="flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+            {{ data?.views }} views
+          </div>
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+          {{ data?.title }}
+        </h1>
+
+        <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+          {{ data?.description }}
+        </p>
+
+        <div class="flex flex-wrap gap-2">
+          <span
+            v-for="tag in data?.tags"
+            :key="tag"
+            class="px-3 py-1 bg-gray-700 text-gray-300 text-sm rounded-full"
+          >
+            {{ tag }}
+          </span>
+        </div>
+      </header>
+
+      <!-- Article Content -->
+      <div class="prose prose-lg prose-invert max-w-none">
+        <ContentRenderer :value="data" class="blog-content" />
+      </div>
+
+      <!-- Article Footer -->
+      <footer class="mt-16 pt-8 border-t border-gray-700">
+        <!-- Share Buttons -->
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center space-x-4">
+            <span class="text-gray-400">Share this article:</span>
+            <button class="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+              </svg>
+              <span>Twitter</span>
+            </button>
+            <button class="flex items-center space-x-2 px-3 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-900 transition-colors">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              <span>LinkedIn</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Author Bio -->
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-start space-x-4">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex-shrink-0"></div>
+            <div>
+              <h3 class="text-lg font-semibold text-white mb-2">Ignat Petrov</h3>
+              <p class="text-gray-300 mb-4">
+                Software Engineer, Solopreneur, and Python Lecturer. Passionate about building 
+                scalable web applications and sharing knowledge with the developer community.
+              </p>
+              <div class="flex space-x-4">
+                <NuxtLink to="/about" class="text-blue-400 hover:text-blue-300 text-sm font-medium">
+                  Learn more about me
+                </NuxtLink>
+                <a href="#" class="text-blue-400 hover:text-blue-300 text-sm font-medium">
+                  Follow on Twitter
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </article>
+
+    <!-- Related Posts -->
+    <section class="bg-gray-800 py-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-white mb-8">Related Posts</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <article 
+            v-for="post in relatedPosts" 
+            :key="post.slug"
+            class="bg-gray-900 rounded-lg p-6 border border-gray-700 hover:border-blue-500 transition-colors"
+          >
+            <div class="flex items-center space-x-3 text-sm text-gray-400 mb-3">
+              <time>{{ formatDate(post.date) }}</time>
+              <span>•</span>
+              <span>{{ post.readTime }} min read</span>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2 hover:text-blue-400 transition-colors">
+              <NuxtLink :to="`/blog/${post.slug}`">
+                {{ post.title }}
+              </NuxtLink>
+            </h3>
+            <p class="text-gray-300 text-sm">{{ post.excerpt }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup>
+const route = useRoute()
+
+// Fetch the blog post content
+const { data } = await useAsyncData(`content-${route.params.slug}`, () => {
+  return queryContent('/blog').where({ _path: `/blog/${route.params.slug}` }).findOne()
+})
+
+// Sample related posts (in a real app, this would be fetched based on tags or categories)
+const relatedPosts = [
+  {
+    slug: 'fastapi-scalable-apis',
+    title: 'Building Scalable APIs with FastAPI',
+    excerpt: 'Tips and best practices for creating high-performance REST APIs using Python\'s FastAPI framework.',
+    date: '2024-03-10',
+    readTime: 12
+  },
+  {
+    slug: 'typescript-advanced-patterns',
+    title: 'Advanced TypeScript Patterns for Better Code',
+    excerpt: 'Explore advanced TypeScript patterns and techniques that will help you write more robust code.',
+    date: '2024-02-28',
+    readTime: 15
+  }
+]
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+// SEO Meta
+useHead({
+  title: data.value?.title || 'Blog Post',
+  meta: [
+    { name: 'description', content: data.value?.description || '' },
+    { name: 'keywords', content: data.value?.tags?.join(', ') || '' }
+  ]
+})
+</script>
+
+<style>
+.blog-content {
+  @apply text-gray-300;
+}
+
+.blog-content h1,
+.blog-content h2,
+.blog-content h3,
+.blog-content h4,
+.blog-content h5,
+.blog-content h6 {
+  @apply text-white font-bold;
+}
+
+.blog-content h1 {
+  @apply text-3xl mb-6 mt-8;
+}
+
+.blog-content h2 {
+  @apply text-2xl mb-4 mt-8;
+}
+
+.blog-content h3 {
+  @apply text-xl mb-4 mt-6;
+}
+
+.blog-content p {
+  @apply mb-4 leading-relaxed;
+}
+
+.blog-content ul,
+.blog-content ol {
+  @apply mb-4 pl-6;
+}
+
+.blog-content li {
+  @apply mb-2;
+}
+
+.blog-content a {
+  @apply text-blue-400 hover:text-blue-300 underline;
+}
+
+.blog-content code {
+  @apply bg-gray-800 text-green-400 px-2 py-1 rounded text-sm;
+}
+
+.blog-content pre {
+  @apply bg-gray-800 p-4 rounded-lg overflow-x-auto mb-4;
+}
+
+.blog-content pre code {
+  @apply bg-transparent p-0;
+}
+
+.blog-content blockquote {
+  @apply border-l-4 border-blue-500 pl-4 italic text-gray-400 my-4;
+}
+
+.blog-content img {
+  @apply rounded-lg my-6;
+}
+
+.blog-content table {
+  @apply w-full border-collapse mb-4;
+}
+
+.blog-content th,
+.blog-content td {
+  @apply border border-gray-700 px-4 py-2;
+}
+
+.blog-content th {
+  @apply bg-gray-800 text-white font-semibold;
+}
+</style>
