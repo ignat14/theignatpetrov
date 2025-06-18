@@ -21,8 +21,9 @@
         </div>
 
         <!-- Mobile menu button -->
-        <div class="md:hidden flex items-center">
+        <div class="flex items-center">
           <button
+            data-cy="mobile-menu-button"
             @click="toggleMobileMenu"
             class="text-gray-300 hover:text-white p-2"
           >
@@ -37,7 +38,7 @@
       </div>
 
       <!-- Mobile Navigation -->
-      <div v-if="mobileMenuOpen" class="md:hidden">
+      <div v-if="mobileMenuOpen" data-cy="mobile-menu">
         <div class="px-2 pt-2 pb-3 space-y-1 bg-gray-800 border-t border-gray-700">
           <NuxtLink 
             v-for="item in navItems" 
@@ -55,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import type { NavItem, NavigationState } from '~/types/navigation'
 
 const navItems: NavItem[] = [
@@ -80,5 +81,15 @@ const closeMobileMenu = (): void => {
 const route = useRoute()
 watch(() => route.path, () => {
   mobileMenuOpen.value = false
+})
+
+onMounted(() => {
+  if (process.env.NODE_ENV !== 'production') {
+    // Expose a test-only hook for Cypress
+    // @ts-ignore
+    window.__openMobileMenu = () => { mobileMenuOpen.value = true }
+    // @ts-ignore
+    window.__closeMobileMenu = () => { mobileMenuOpen.value = false }
+  }
 })
 </script> 
