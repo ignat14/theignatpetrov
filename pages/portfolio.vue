@@ -105,22 +105,24 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
+import { ProjectCategory, ProjectStatus } from '~/types/portfolio'
+import type { Project } from '~/types/portfolio'
 
-const activeCategory = ref('All')
+const activeCategory = ref<ProjectCategory | 'All'>('All')
 
-const categories = ['All', 'Web Apps', 'APIs', 'Open Source', 'Mobile']
+const categories: (ProjectCategory | 'All')[] = ['All', ProjectCategory.WEB_APP, ProjectCategory.API, ProjectCategory.OPEN_SOURCE, ProjectCategory.MOBILE]
 
-const projects = [
+const projects: Project[] = [
   {
     id: 1,
     name: 'E-Commerce Platform',
     description: 'Full-stack e-commerce solution with Vue.js frontend and Django backend. Features include user authentication, payment processing, and admin dashboard.',
-    category: 'Web Apps',
+    category: ProjectCategory.WEB_APP,
     technologies: ['Vue.js', 'Django', 'PostgreSQL', 'Stripe', 'Docker'],
     gradient: 'bg-gradient-to-br from-blue-500 to-purple-600',
-    status: 'Live',
+    status: ProjectStatus.LIVE,
     statusColor: 'bg-green-500 text-white',
     liveUrl: '#',
     githubUrl: '#'
@@ -129,10 +131,10 @@ const projects = [
     id: 2,
     name: 'Task Management API',
     description: 'RESTful API built with FastAPI for task management. Includes JWT authentication, real-time notifications, and comprehensive documentation.',
-    category: 'APIs',
+    category: ProjectCategory.API,
     technologies: ['FastAPI', 'PostgreSQL', 'Redis', 'WebSockets', 'JWT'],
     gradient: 'bg-gradient-to-br from-green-500 to-blue-500',
-    status: 'Live',
+    status: ProjectStatus.LIVE,
     statusColor: 'bg-green-500 text-white',
     liveUrl: '#',
     githubUrl: '#'
@@ -141,10 +143,10 @@ const projects = [
     id: 3,
     name: 'React Component Library',
     description: 'Open-source React component library with TypeScript support. Includes 50+ components with comprehensive Storybook documentation.',
-    category: 'Open Source',
+    category: ProjectCategory.OPEN_SOURCE,
     technologies: ['React', 'TypeScript', 'Storybook', 'Jest', 'Rollup'],
     gradient: 'bg-gradient-to-br from-purple-500 to-pink-500',
-    status: 'Active',
+    status: ProjectStatus.ACTIVE,
     statusColor: 'bg-blue-500 text-white',
     liveUrl: '#',
     githubUrl: '#'
@@ -153,10 +155,10 @@ const projects = [
     id: 4,
     name: 'Financial Dashboard',
     description: 'Real-time financial dashboard with data visualization. Built with React and D3.js, featuring interactive charts and portfolio tracking.',
-    category: 'Web Apps',
+    category: ProjectCategory.WEB_APP,
     technologies: ['React', 'D3.js', 'Node.js', 'MongoDB', 'Socket.io'],
     gradient: 'bg-gradient-to-br from-yellow-500 to-red-500',
-    status: 'In Development',
+    status: ProjectStatus.IN_DEVELOPMENT,
     statusColor: 'bg-yellow-500 text-black',
     liveUrl: null,
     githubUrl: '#'
@@ -165,10 +167,10 @@ const projects = [
     id: 5,
     name: 'Python Data Pipeline',
     description: 'Scalable data processing pipeline for ETL operations. Handles large datasets with Apache Airflow orchestration and monitoring.',
-    category: 'APIs',
+    category: ProjectCategory.API,
     technologies: ['Python', 'Apache Airflow', 'Pandas', 'PostgreSQL', 'Docker'],
     gradient: 'bg-gradient-to-br from-indigo-500 to-purple-500',
-    status: 'Live',
+    status: ProjectStatus.LIVE,
     statusColor: 'bg-green-500 text-white',
     liveUrl: '#',
     githubUrl: '#'
@@ -177,20 +179,20 @@ const projects = [
     id: 6,
     name: 'Mobile Weather App',
     description: 'Cross-platform mobile app built with React Native. Features weather forecasts, location-based alerts, and offline functionality.',
-    category: 'Mobile',
+    category: ProjectCategory.MOBILE,
     technologies: ['React Native', 'Expo', 'Redux', 'AsyncStorage', 'API Integration'],
     gradient: 'bg-gradient-to-br from-cyan-500 to-blue-500',
-    status: 'Live',
+    status: ProjectStatus.LIVE,
     statusColor: 'bg-green-500 text-white',
     liveUrl: '#',
     githubUrl: '#'
   }
 ]
 
-const filteredProjects = computed(() => {
+const filteredProjects = computed<Project[]>(() => {
   if (activeCategory.value === 'All') {
     return projects
   }
-  return projects.filter(project => project.category === activeCategory.value)
+  return projects.filter((project: Project) => project.category === activeCategory.value)
 })
 </script>

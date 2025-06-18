@@ -130,15 +130,16 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
+import type { BlogPost } from '~/types/blog'
 
-const searchQuery = ref('')
-const selectedTags = ref([])
-const displayedPostsCount = ref(6)
+const searchQuery = ref<string>('')
+const selectedTags = ref<string[]>([])
+const displayedPostsCount = ref<number>(6)
 
 // Sample blog posts data
-const blogPosts = [
+const blogPosts: BlogPost[] = [
   {
     slug: 'vue-3-composition-api',
     title: 'Getting Started with Vue 3 Composition API',
@@ -221,21 +222,21 @@ const blogPosts = [
   }
 ]
 
-const allTags = computed(() => {
-  const tags = new Set()
-  blogPosts.forEach(post => {
-    post.tags.forEach(tag => tags.add(tag))
+const allTags = computed<string[]>(() => {
+  const tags = new Set<string>()
+  blogPosts.forEach((post: BlogPost) => {
+    post.tags.forEach((tag: string) => tags.add(tag))
   })
   return Array.from(tags).sort()
 })
 
-const filteredPosts = computed(() => {
-  let posts = blogPosts
+const filteredPosts = computed<BlogPost[]>(() => {
+  let posts: BlogPost[] = blogPosts
 
   // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    posts = posts.filter(post => 
+    posts = posts.filter((post: BlogPost) => 
       post.title.toLowerCase().includes(query) ||
       post.excerpt.toLowerCase().includes(query) ||
       post.tags.some(tag => tag.toLowerCase().includes(query))
@@ -244,34 +245,33 @@ const filteredPosts = computed(() => {
 
   // Filter by selected tags
   if (selectedTags.value.length > 0) {
-    posts = posts.filter(post =>
-      selectedTags.value.some(tag => post.tags.includes(tag))
+    posts = posts.filter((post: BlogPost) =>
+      selectedTags.value.every(tag => post.tags.includes(tag))
     )
   }
 
-  // Limit displayed posts
   return posts.slice(0, displayedPostsCount.value)
 })
 
-const hasMorePosts = computed(() => {
-  return displayedPostsCount.value < blogPosts.length
+const hasMorePosts = computed<boolean>(() => {
+  return filteredPosts.value.length < blogPosts.length
 })
 
-const toggleTag = (tag) => {
+const toggleTag = (tag: string): void => {
   const index = selectedTags.value.indexOf(tag)
-  if (index > -1) {
-    selectedTags.value.splice(index, 1)
-  } else {
+  if (index === -1) {
     selectedTags.value.push(tag)
+  } else {
+    selectedTags.value.splice(index, 1)
   }
 }
 
-const loadMorePosts = () => {
+const loadMorePosts = (): void => {
   displayedPostsCount.value += 6
 }
 
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
+const formatDate = (date: string): string => {
+  return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'

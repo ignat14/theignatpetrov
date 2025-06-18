@@ -157,21 +157,21 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 
-const titles = [
+const titles: string[] = [
   'Software Engineer',
   'Solopreneur', 
   'Freelancer at Toptal',
   'Python Lecturer'
 ]
 
-const currentTitle = ref('')
-const titleIndex = ref(0)
-let intervalId = null
+const currentTitle = ref<string>('')
+const titleIndex = ref<number>(0)
+let intervalId: NodeJS.Timeout | null = null
 
-const morphTitle = async (fromTitle, toTitle) => {
+const morphTitle = async (fromTitle: string, toTitle: string): Promise<void> => {
   const maxLength = Math.max(fromTitle.length, toTitle.length)
   
   // Matrix rain transformation effect
@@ -196,18 +196,18 @@ const morphTitle = async (fromTitle, toTitle) => {
     }
     
     currentTitle.value = newTitle.trim()
-    await new Promise(resolve => setTimeout(resolve, 80))
+    await new Promise<void>(resolve => setTimeout(resolve, 80))
   }
   
   // Hold the final title
   currentTitle.value = toTitle
-  await new Promise(resolve => setTimeout(resolve, 3000))
+  await new Promise<void>(resolve => setTimeout(resolve, 3000))
 }
 
-const startAnimation = async () => {
+const startAnimation = async (): Promise<void> => {
   // Start with first title
   currentTitle.value = titles[0]
-  await new Promise(resolve => setTimeout(resolve, 3000))
+  await new Promise<void>(resolve => setTimeout(resolve, 3000))
   
   while (true) {
     const currentIndex = titleIndex.value

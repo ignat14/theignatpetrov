@@ -128,33 +128,42 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { BlogContent, BlogPost } from '~/types/blog'
+
 const route = useRoute()
 
 // Fetch the blog post content
-const { data } = await useAsyncData(`content-${route.params.slug}`, () => {
-  return queryContent('/blog').where({ _path: `/blog/${route.params.slug}` }).findOne()
+const { data } = await useAsyncData<BlogContent>(`content-${route.params.slug}`, async () => {
+  const content = await queryContent('/blog').where({ _path: `/blog/${route.params.slug}` }).findOne()
+  return content as unknown as BlogContent
 })
 
 // Sample related posts (in a real app, this would be fetched based on tags or categories)
-const relatedPosts = [
+const relatedPosts: BlogPost[] = [
   {
     slug: 'fastapi-scalable-apis',
     title: 'Building Scalable APIs with FastAPI',
     excerpt: 'Tips and best practices for creating high-performance REST APIs using Python\'s FastAPI framework.',
     date: '2024-03-10',
-    readTime: 12
+    readTime: 12,
+    tags: ['Python', 'FastAPI', 'Backend'],
+    views: 892,
+    comments: 8
   },
   {
     slug: 'typescript-advanced-patterns',
     title: 'Advanced TypeScript Patterns for Better Code',
     excerpt: 'Explore advanced TypeScript patterns and techniques that will help you write more robust code.',
     date: '2024-02-28',
-    readTime: 15
+    readTime: 15,
+    tags: ['TypeScript', 'JavaScript', 'Development'],
+    views: 1456,
+    comments: 23
   }
 ]
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return ''
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',

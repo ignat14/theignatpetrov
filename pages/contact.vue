@@ -113,7 +113,7 @@
             <div class="bg-gray-800 rounded-lg p-8 border border-gray-700">
               <h2 class="text-2xl font-bold text-white mb-6">Send a Message</h2>
               
-              <form @submit.prevent="submitForm" class="space-y-6">
+              <form @submit.prevent="handleSubmit" class="space-y-6">
                 <div class="grid sm:grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <label for="firstName" class="block text-sm font-medium text-gray-300 mb-2">
@@ -256,12 +256,22 @@
               </form>
 
               <!-- Success Message -->
-              <div v-if="showSuccess" class="mt-6 p-4 bg-green-600 rounded-lg">
+              <div v-if="submitSuccess" class="mt-6 p-4 bg-green-600 rounded-lg">
                 <div class="flex items-center">
                   <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <p class="text-white font-medium">Message sent successfully! I'll get back to you soon.</p>
+                </div>
+              </div>
+
+              <!-- Error Message -->
+              <div v-if="submitError" class="mt-6 p-4 bg-red-600 rounded-lg">
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  <p class="text-white font-medium">{{ submitError }}</p>
                 </div>
               </div>
             </div>
@@ -272,49 +282,50 @@
   </div>
 </template>
 
-<script setup>
-import { ref, reactive } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { ContactForm } from '~/types/contact'
 
-const isSubmitting = ref(false)
-const showSuccess = ref(false)
-
-const form = reactive({
+const form = ref<ContactForm>({
   firstName: '',
   lastName: '',
   email: '',
   company: '',
-  subject: '',
+  subject: 'freelance',
   budget: '',
   message: '',
   agreeToTerms: false
 })
 
-const submitForm = async () => {
+const isSubmitting = ref(false)
+const submitSuccess = ref(false)
+const submitError = ref('')
+
+const handleSubmit = async () => {
+  if (!form.value.agreeToTerms) {
+    submitError.value = 'Please agree to the terms and conditions'
+    return
+  }
+
   isSubmitting.value = true
-  
+  submitError.value = ''
+
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Show success message
-    showSuccess.value = true
-    
-    // Reset form
-    Object.keys(form).forEach(key => {
-      if (typeof form[key] === 'boolean') {
-        form[key] = false
-      } else {
-        form[key] = ''
-      }
-    })
-    
-    // Hide success message after 5 seconds
-    setTimeout(() => {
-      showSuccess.value = false
-    }, 5000)
-    
+    // TODO: Implement form submission
+    await new Promise(resolve => setTimeout(resolve, 1000)) // Simulated API call
+    submitSuccess.value = true
+    form.value = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      company: '',
+      subject: 'freelance',
+      budget: '',
+      message: '',
+      agreeToTerms: false
+    }
   } catch (error) {
-    console.error('Error submitting form:', error)
+    submitError.value = 'Failed to submit form. Please try again.'
   } finally {
     isSubmitting.value = false
   }
