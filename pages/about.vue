@@ -15,25 +15,29 @@
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-center mb-16">
           <div class="order-2 md:order-1">
-            <div class="w-48 h-48 sm:w-64 sm:h-64 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-8"></div>
+            <div class="relative w-48 h-48 sm:w-64 sm:h-64 mx-auto mb-8">
+              <img 
+                src="/images/profile_pic.jpeg" 
+                alt="Ignat Petrov"
+                class="w-full h-full object-cover rounded-full border-4 border-blue-500 shadow-lg"
+              />
+              <div class="absolute inset-0 rounded-full shadow-inner"></div>
+            </div>
           </div>
           <div class="order-1 md:order-2 text-center md:text-left">
             <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6">Hi, I'm Ignat</h2>
             <p class="text-gray-300 text-lg mb-6">
-              I'm a passionate software engineer with over 5 years of experience building 
-              scalable web applications and leading development teams. My journey in tech 
-              started with curiosity about how things work, and has evolved into a career 
+              I'm a passionate software engineer with over 9 years of experience building 
+              scalable web applications. My journey in tech 
+              actually started working at a VFX studio, and has evolved into a career 
               focused on creating meaningful solutions.
             </p>
             <p class="text-gray-300 text-lg mb-6">
-              As a solopreneur and freelancer at Toptal, I've had the privilege of working 
-              with startups and established companies across various industries. I also 
-              share my knowledge as a Python lecturer, helping the next generation of 
-              developers master the craft.
+              I'm currently transitioning into solopreneurship, and I'm looking for new challenges.
+              My plan is to use my skills and experience to start building some cool stuff.
             </p>
             <p class="text-gray-300 text-lg">
-              When I'm not coding, you'll find me exploring new technologies, contributing 
-              to open source projects, or sharing insights through technical writing.
+              When I'm not coding, I'm usually spending time with my family, reading books, or playing basketball.
             </p>
           </div>
         </div>
@@ -142,23 +146,47 @@ const skills: Skill[] = [
 
 const experiences: Experience[] = [
   {
-    title: 'Freelancer at Toptal',
-    period: '2021 - Present',
+    title: 'Software Engineer @Qogita',
+    period: 'May 2022 - June 2025',
+    color: 'text-indigo-400',
+    description: 'Helped shape the backend of one of the biggest startups in Europe.'
+  },
+  {
+    title: 'Software Engineer @Iprova',
+    period: 'Aug 2022 - Apr 2022',
+    color: 'text-cyan-400',
+    description: ''
+  },
+  {
+    title: 'Freelancer @Toptal',
+    period: 'Mar 2020 - August 2021',
     color: 'text-blue-400',
-    description: 'Working with top-tier clients on challenging projects, delivering high-quality solutions for web applications and API development.'
+    description: 'Freelancer at Toptal: https://www.toptal.com/resume/ignat-petrov'
   },
   {
-    title: 'Python Lecturer',
-    period: '2020 - Present',
-    color: 'text-green-400',
-    description: 'Teaching Python programming and web development to students and professionals, creating course materials and mentoring developers.'
+    title: 'Software Engineer @Komuna.dev',
+    period: 'Nov 2018 - Aug 2021',
+    color: 'text-emerald-400',
+    description: 'Worked on a project for communication and collaboration solutions for business continuity, disaster recovery, crisis communications and operations management. On the back-end always making sure to deliver secure and reliable solutions using Python and Django, communicating with Twilio, Textlocal and MailGun APIs. On the front-end I was responsible for migrating the application from AngularJs to VueJs.'
   },
   {
-    title: 'Solopreneur',
-    period: '2019 - Present',
+    title: 'Python Lecturer @Semos',
+    period: 'Dec 2018 - Nov 2019',
+    color: 'text-amber-400',
+    description: 'As the first Python Trainer at the Semos Education Center I developed courses for 2 Python classes (5 weeks each) which I taught to groups of 10 - 13 students in the period of 1 year'
+  },
+  {
+    title: 'Software Engineer @Nebiz',
+    period: 'Jul 2018 - Nov 2018',
+    color: 'text-rose-400',
+    description: 'Created and customized numerous modules for the Python ERP framework Odoo regarding accounting, sales, purchase, inventory work and manufacturing for successful businesses mostly located in Switzerland and Austria'
+  },
+  {
+    title: 'Rotomation Superevisor | Python developer @Vertigo Visual',
+    period: 'Sep 2015 - Jun 2018',
     color: 'text-purple-400',
-    description: 'Building and launching digital products, managing end-to-end development processes, and growing sustainable software businesses.'
-  }
+    description: "As a Python developer I have created many tools which help automate the whole visual effects creation process using Python. Some of the tools I made helped double the artists' speed and more importantly helped for a lot more precise work. As a Rotomation Supervisor I was responsible for delegating and quality control of the work that was done by my team which included 7 members. Together we have successfully finished many projects, including numerous successful Hollywood blockbusters."
+  },
 ]
 
 const values: Value[] = [
