@@ -33,8 +33,8 @@
                 </div>
                 <div>
                   <h3 class="text-white font-semibold">Email</h3>
-                  <a href="mailto:ignat@example.com" class="text-blue-400 hover:text-blue-300 transition-colors">
-                    ignat@example.com
+                  <a href="mailto:ignat14@gmail.com" class="text-blue-400 hover:text-blue-300 transition-colors">
+                    ignat14@gmail.com
                   </a>
                 </div>
               </div>
@@ -47,7 +47,7 @@
                 </div>
                 <div>
                   <h3 class="text-white font-semibold">LinkedIn</h3>
-                  <a href="https://linkedin.com/in/ignatpetrov" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors">
+                  <a href="https://www.linkedin.com/in/ignat-petrov-98285872/" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors">
                     linkedin.com/in/ignatpetrov
                   </a>
                 </div>
@@ -61,8 +61,8 @@
                 </div>
                 <div>
                   <h3 class="text-white font-semibold">GitHub</h3>
-                  <a href="https://github.com/ignatpetrov" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors">
-                    github.com/ignatpetrov
+                  <a href="https://github.com/ignat14" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors">
+                    github.com/ignat14
                   </a>
                 </div>
               </div>
@@ -75,8 +75,8 @@
                 </div>
                 <div>
                   <h3 class="text-white font-semibold">Twitter</h3>
-                  <a href="https://twitter.com/ignatpetrov" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors">
-                    @ignatpetrov
+                  <a href="https://twitter.com/theignatpetrov" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors">
+                    @theignatpetrov
                   </a>
                 </div>
               </div>
