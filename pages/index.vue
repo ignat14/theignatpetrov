@@ -8,11 +8,11 @@
       </div>
       
       <div class="text-center z-10 relative">
-        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-8 text-white text-center px-4">
+        <h1 class="font-saira text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-8 text-white text-center px-4">
           Ignat Petrov
         </h1>
         <div class="h-12 sm:h-16 flex items-center justify-center px-4">
-          <div class="text-lg sm:text-xl md:text-2xl lg:text-4xl font-mono text-green-400 matrix-text text-center">
+          <div class="font-saira text-lg sm:text-xl md:text-2xl lg:text-4xl font-mono text-green-400 matrix-text text-center">
             {{ currentTitle }}
           </div>
         </div>
@@ -158,7 +158,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const titles: string[] = [
   'Software Engineer',
@@ -169,7 +169,6 @@ const titles: string[] = [
 
 const currentTitle = ref<string>('')
 const titleIndex = ref<number>(0)
-let intervalId: NodeJS.Timeout | null = null
 
 const morphTitle = async (fromTitle: string, toTitle: string): Promise<void> => {
   const maxLength = Math.max(fromTitle.length, toTitle.length)
@@ -190,7 +189,7 @@ const morphTitle = async (fromTitle: string, toTitle: string): Promise<void> => 
         newTitle += toTitle[i] || ' '
       } else {
         // In transition - show random matrix characters
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*'
+        const chars = '0123456789@#$%^&*?><|\\;:~{}[]'
         newTitle += chars[Math.floor(Math.random() * chars.length)]
       }
     }
@@ -240,8 +239,8 @@ onMounted(() => {
 }
 
 .matrix-text {
-  text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
-  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 10px #00ff00, 0 0 2px #00ff00, 0 0 30px #00ff00;
+  font-family: 'Saira Condensed', monospace;
   min-height: 1.5em;
   display: flex;
   align-items: center;

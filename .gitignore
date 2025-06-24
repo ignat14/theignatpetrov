@@ -23,6 +23,3 @@ node_modules
 
 # Vercel
 .vercel
-
-# Netlify
-.netlify
