@@ -141,8 +141,18 @@ const displayedPostsCount = ref<number>(6)
 // Sample blog posts data
 const blogPosts: BlogPost[] = [
   {
+    slug: 'creeping-in-comfort-zone',
+    title: 'Creeping in Comfort Zone',
+    excerpt: 'I thought that I was always keeping myself away from the Comfort Zone, failing to realize that it can come in different areas of life.',
+    date: '2025-06-27',
+    readTime: 8,
+    tags: ['Burnout', 'Comfort Zone', 'Mindfulness'],
+    views: 150,
+    comments: 2
+  },
+  {
     slug: 'vue-3-composition-api',
-    title: 'Getting Started with Vue 3 Composition API',
+    title: 'Getting Started with Vue 3 Composition API [Example]',
     excerpt: 'Learn how to use the new Composition API in Vue 3 to write more maintainable and reusable components. We\'ll explore the basics and build a practical example.',
     date: '2024-03-15',
     readTime: 8,
@@ -150,76 +160,7 @@ const blogPosts: BlogPost[] = [
     views: 1234,
     comments: 15
   },
-  {
-    slug: 'fastapi-scalable-apis',
-    title: 'Building Scalable APIs with FastAPI',
-    excerpt: 'Tips and best practices for creating high-performance REST APIs using Python\'s FastAPI framework. Learn about async programming, dependency injection, and more.',
-    date: '2024-03-10',
-    readTime: 12,
-    tags: ['Python', 'FastAPI', 'Backend'],
-    views: 892,
-    comments: 8
-  },
-  {
-    slug: 'docker-best-practices',
-    title: 'Docker Best Practices for Development',
-    excerpt: 'Streamline your development workflow with these Docker tips and tricks for better container management, faster builds, and improved security.',
-    date: '2024-03-05',
-    readTime: 6,
-    tags: ['Docker', 'DevOps', 'Development'],
-    views: 567,
-    comments: 12
-  },
-  {
-    slug: 'typescript-advanced-patterns',
-    title: 'Advanced TypeScript Patterns for Better Code',
-    excerpt: 'Explore advanced TypeScript patterns and techniques that will help you write more robust and maintainable code. From utility types to conditional types.',
-    date: '2024-02-28',
-    readTime: 15,
-    tags: ['TypeScript', 'JavaScript', 'Development'],
-    views: 1456,
-    comments: 23
-  },
-  {
-    slug: 'python-async-programming',
-    title: 'Mastering Async Programming in Python',
-    excerpt: 'Deep dive into Python\'s asyncio library and learn how to write efficient asynchronous code. Perfect for building high-performance web applications.',
-    date: '2024-02-20',
-    readTime: 10,
-    tags: ['Python', 'Async', 'Performance'],
-    views: 789,
-    comments: 18
-  },
-  {
-    slug: 'web-performance-optimization',
-    title: 'Web Performance Optimization Techniques',
-    excerpt: 'Comprehensive guide to optimizing web application performance. Learn about lazy loading, code splitting, caching strategies, and more.',
-    date: '2024-02-15',
-    readTime: 14,
-    tags: ['Performance', 'Web', 'Optimization'],
-    views: 1123,
-    comments: 27
-  },
-  {
-    slug: 'react-vs-vue-comparison',
-    title: 'React vs Vue: A Comprehensive Comparison',
-    excerpt: 'An in-depth comparison of React and Vue.js, covering syntax, performance, ecosystem, and use cases to help you choose the right framework.',
-    date: '2024-02-10',
-    readTime: 11,
-    tags: ['React', 'Vue.js', 'Frontend'],
-    views: 2341,
-    comments: 45
-  },
-  {
-    slug: 'microservices-architecture',
-    title: 'Introduction to Microservices Architecture',
-    excerpt: 'Learn the fundamentals of microservices architecture, its benefits, challenges, and when to use it in your projects.',
-    date: '2024-02-05',
-    readTime: 13,
-    tags: ['Microservices', 'Architecture', 'Backend'],
-    views: 987,
-    comments: 22
-  }
+  
 ]
 
 const allTags = computed<string[]>(() => {
