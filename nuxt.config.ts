@@ -1,5 +1,12 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      gtag: {
+        id: process.env.NUXT_PUBLIC_GTAG_ID
+      }
+    }
+  },
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxt/content'
