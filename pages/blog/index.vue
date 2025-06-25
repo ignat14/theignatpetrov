@@ -138,8 +138,8 @@ import type { BlogPost } from '~/types/blog'
 const searchQuery = ref<string>('')
 const selectedTags = ref<string[]>([])
 const displayedPostsCount = ref<number>(6)
-const analyticsData = ref<any[]>([])
-const isLoadingAnalytics = ref<boolean>(true)
+
+const { isLoadingAnalytics, fetchAnalytics, updateBlogPosts } = useAnalytics()
 
 // Sample blog posts data
 const blogPosts = ref<BlogPost[]>([
@@ -168,24 +168,8 @@ const blogPosts = ref<BlogPost[]>([
 
 // Fetch analytics data and merge with blog posts
 onMounted(async () => {
-  try {
-    const data = await $fetch('/api/analytics/pageviews') as any[]
-    analyticsData.value = Array.isArray(data) ? data : []
-    
-    // Update blog posts with real analytics data
-    blogPosts.value.forEach(post => {
-      const analyticsMatch = analyticsData.value.find(item => 
-        item.path.includes(post.slug)
-      )
-      if (analyticsMatch) {
-        post.views = analyticsMatch.views
-      }
-    })
-  } catch (error) {
-    console.warn('Could not fetch analytics data:', error)
-  } finally {
-    isLoadingAnalytics.value = false
-  }
+  await fetchAnalytics()
+  updateBlogPosts(blogPosts.value)
 })
 
 const allTags = computed<string[]>(() => {
