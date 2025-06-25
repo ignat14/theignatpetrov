@@ -5,8 +5,15 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   
   try {
-    // Use Application Default Credentials (more secure)
-    const analyticsDataClient = new BetaAnalyticsDataClient()
+    // Use credentials from environment variable for production
+    let analyticsDataClient
+    if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+      const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
+      analyticsDataClient = new BetaAnalyticsDataClient({ credentials })
+    } else {
+      // Use Application Default Credentials for local development
+      analyticsDataClient = new BetaAnalyticsDataClient()
+    }
 
     const [response] = await analyticsDataClient.runReport({
       property: `properties/${config.gaPropertyId}`,
