@@ -21,6 +21,7 @@
     "start-server-and-test": "^2.0.12"
   },
   "dependencies": {
+    "@google-analytics/data": "^5.1.0",
     "@nuxt/content": "^2.8.5",
     "@nuxtjs/tailwindcss": "^6.8.4",
     "vue-gtag-next": "^1.14.0"

@@ -131,12 +131,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { BlogPost } from '~/types/blog'
 
 const searchQuery = ref<string>('')
 const selectedTags = ref<string[]>([])
 const displayedPostsCount = ref<number>(6)
+const analyticsData = ref<any[]>([])
 
 // Sample blog posts data
 const blogPosts: BlogPost[] = [
@@ -147,7 +148,7 @@ const blogPosts: BlogPost[] = [
     date: '2025-06-27',
     readTime: 8,
     tags: ['Burnout', 'Comfort Zone', 'Mindfulness'],
-    views: 150,
+    views: 0,
     comments: 2
   },
   {
@@ -157,11 +158,31 @@ const blogPosts: BlogPost[] = [
     date: '2024-03-15',
     readTime: 8,
     tags: ['Vue.js', 'JavaScript', 'Frontend'],
-    views: 1234,
+    views: 0,
     comments: 15
   },
   
 ]
+
+// Fetch analytics data and merge with blog posts
+onMounted(async () => {
+  try {
+    const data = await $fetch('/api/analytics/pageviews') as any[]
+    analyticsData.value = Array.isArray(data) ? data : []
+    
+    // Update blog posts with real analytics data
+    blogPosts.forEach(post => {
+      const analyticsMatch = analyticsData.value.find(item => 
+        item.path.includes(post.slug)
+      )
+      if (analyticsMatch) {
+        post.views = analyticsMatch.views
+      }
+    })
+  } catch (error) {
+    console.warn('Could not fetch analytics data:', error)
+  }
+})
 
 const allTags = computed<string[]>(() => {
   const tags = new Set<string>()

@@ -1,6 +1,7 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
+    gaPropertyId: process.env.GA_PROPERTY_ID,
     public: {
       gtag: {
         id: process.env.NUXT_PUBLIC_GTAG_ID
