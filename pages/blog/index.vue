@@ -97,7 +97,8 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
-                    {{ post.views }} views
+                    <span v-if="isLoadingAnalytics" class="inline-block w-8 h-4 bg-gray-600 rounded animate-pulse"></span>
+                    <span v-else>{{ post.views }} views</span>
                   </span>
                   <span class="flex items-center">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,9 +139,10 @@ const searchQuery = ref<string>('')
 const selectedTags = ref<string[]>([])
 const displayedPostsCount = ref<number>(6)
 const analyticsData = ref<any[]>([])
+const isLoadingAnalytics = ref<boolean>(true)
 
 // Sample blog posts data
-const blogPosts: BlogPost[] = [
+const blogPosts = ref<BlogPost[]>([
   {
     slug: 'creeping-in-comfort-zone',
     title: 'Creeping in Comfort Zone',
@@ -162,7 +164,7 @@ const blogPosts: BlogPost[] = [
     comments: 15
   },
   
-]
+])
 
 // Fetch analytics data and merge with blog posts
 onMounted(async () => {
@@ -171,7 +173,7 @@ onMounted(async () => {
     analyticsData.value = Array.isArray(data) ? data : []
     
     // Update blog posts with real analytics data
-    blogPosts.forEach(post => {
+    blogPosts.value.forEach(post => {
       const analyticsMatch = analyticsData.value.find(item => 
         item.path.includes(post.slug)
       )
@@ -181,19 +183,21 @@ onMounted(async () => {
     })
   } catch (error) {
     console.warn('Could not fetch analytics data:', error)
+  } finally {
+    isLoadingAnalytics.value = false
   }
 })
 
 const allTags = computed<string[]>(() => {
   const tags = new Set<string>()
-  blogPosts.forEach((post: BlogPost) => {
+  blogPosts.value.forEach((post: BlogPost) => {
     post.tags.forEach((tag: string) => tags.add(tag))
   })
   return Array.from(tags).sort()
 })
 
 const filteredPosts = computed<BlogPost[]>(() => {
-  let posts: BlogPost[] = blogPosts
+  let posts: BlogPost[] = blogPosts.value
 
   // Filter by search query
   if (searchQuery.value) {
@@ -216,7 +220,7 @@ const filteredPosts = computed<BlogPost[]>(() => {
 })
 
 const hasMorePosts = computed<boolean>(() => {
-  return filteredPosts.value.length < blogPosts.length
+  return filteredPosts.value.length < blogPosts.value.length
 })
 
 const toggleTag = (tag: string): void => {
