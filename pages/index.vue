@@ -182,54 +182,53 @@ const { getLatestPosts } = useBlogPosts()
 
 const latestPosts = ref<BlogPost[]>([])
 
-// Animation configuration
-const ANIMATION_CONFIG = {
-  matrixChars: '!@#$%{}[]\\/?><;01',   // Single-width characters for matrix effect
-  matrixCharsWide: 'アイウエオカキクケコサシスセソタチツテト', // Double-width characters
-  matrixSpinTime: 1000,               // Time to spin matrix chars before revealing (ms)
-  charRevealInterval: 150,            // Time between each character reveal (ms)
-  matrixSpinSpeed: 100,               // Speed of matrix character changes (ms)
-  betweenWordsTime: 2000,             // Time between first and second word (ms)
-  secondWordSpinTime: 1000,           // Time to spin second word before revealing (ms)
-  finalSpinChars: '01!@#$%^&*(){}[]|\\:;"<>,.?/',   // Characters for final spinning animation
-  finalSpinCharsWide: 'アイウエオカキクケコサシスセソタチツテト', // Double-width final spin chars
-  finalLandingChars: '#*?',         // Characters to land on after spinning
-  finalSpinInterval: 3000,            // Time between each final spin cycle (ms)
-  finalSpinDuration: 1000             // Duration of each spinning animation (ms)
+// Character sets for animations
+const CHARACTER_SETS = {
+  matrix: '!@#$%{}[]\\/?><;01',
+  matrixWide: 'アイウエオカキクケコサシスセソタチツテト',
+  finalSpin: '01!@#$%^&*(){}[]|\\:;"<>,.?/',
+  finalSpinWide: 'アイウエオカキクケコサシスセソタチツテト',
+  finalLanding: '#*?'
+} as const
+
+// Animation timing configuration (in milliseconds)
+const TIMING_CONFIG = {
+  matrixSpinTime: 1000,
+  charRevealInterval: 150,
+  matrixSpinSpeed: 100,
+  betweenWordsTime: 2000,
+  finalSpinInterval: 3000,
+  finalSpinDuration: 1000
+} as const
+
+// Types
+type CharResult = { char: string; isWide: boolean }
+
+// Utility functions
+const getRandomChar = (charSet: string): string => {
+  return charSet[Math.floor(Math.random() * charSet.length)]
 }
 
 const getRandomMatrixChar = (): string => {
-  const chars = ANIMATION_CONFIG.matrixChars
-  return chars[Math.floor(Math.random() * chars.length)]
+  return getRandomChar(CHARACTER_SETS.matrix)
 }
 
-const getRandomMatrixCharSmart = (canUseWide: boolean = true): { char: string, isWide: boolean } => {
-  const useWide = canUseWide && Math.random() < 0.3 // 30% chance for wide chars when available
+const getRandomMatrixCharSmart = (canUseWide: boolean = true): CharResult => {
+  const useWide = canUseWide && Math.random() < 0.3
   
-  if (useWide) {
-    const wideChars = ANIMATION_CONFIG.matrixCharsWide
-    return {
-      char: wideChars[Math.floor(Math.random() * wideChars.length)],
-      isWide: true
-    }
-  } else {
-    const chars = ANIMATION_CONFIG.matrixChars
-    return {
-      char: chars[Math.floor(Math.random() * chars.length)],
-      isWide: false
-    }
-  }
+  return useWide
+    ? { char: getRandomChar(CHARACTER_SETS.matrixWide), isWide: true }
+    : { char: getRandomChar(CHARACTER_SETS.matrix), isWide: false }
 }
 
-const animateWordReveal = async (targetText: string): Promise<void> => {
-  // Initialize display with matrix chars, but keep spaces fixed
-  let displayChars = Array.from({ length: targetText.length }, (_, index) => 
-    targetText[index] === ' ' ? ' ' : ' ' // Start with spaces, will be filled by smart char generation
-  )
-  let revealedPositions = new Set<number>()
+const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms))
+
+// Character display initialization and updates
+const initializeDisplayChars = (targetText: string): [string[], Set<number>] => {
+  const displayChars = Array.from({ length: targetText.length }, () => ' ')
+  const revealedPositions = new Set<number>()
   let skipNext = false
   
-  // Mark space positions as already revealed and generate initial matrix chars
   for (let i = 0; i < targetText.length; i++) {
     if (targetText[i] === ' ') {
       revealedPositions.add(i)
@@ -241,7 +240,7 @@ const animateWordReveal = async (targetText: string): Promise<void> => {
       if (charResult.isWide) {
         displayChars[i] = charResult.char
         if (i + 1 < targetText.length) {
-          displayChars[i + 1] = '' // Second half of wide char
+          displayChars[i + 1] = ''
         }
         skipNext = true
       } else {
@@ -253,33 +252,46 @@ const animateWordReveal = async (targetText: string): Promise<void> => {
     }
   }
   
-  // Matrix spinning phase
-  const spinInterval = setInterval(() => {
-    let skipNextSpin = false
-    for (let i = 0; i < displayChars.length; i++) {
-      if (!revealedPositions.has(i) && !skipNextSpin) {
-        const canUseWide = i < targetText.length - 1 && !revealedPositions.has(i + 1) && targetText[i + 1] !== ' '
-        const charResult = getRandomMatrixCharSmart(canUseWide)
-        
-        if (charResult.isWide) {
-          displayChars[i] = charResult.char
-          if (i + 1 < displayChars.length) {
-            displayChars[i + 1] = ''
-          }
-          skipNextSpin = true
-        } else {
-          displayChars[i] = charResult.char
-          skipNextSpin = false
+  return [displayChars, revealedPositions]
+}
+
+// Helper function to update spinning characters
+const updateSpinningChars = (displayChars: string[], targetText: string, revealedPositions: Set<number>): void => {
+  let skipNextSpin = false
+  
+  for (let i = 0; i < displayChars.length; i++) {
+    if (!revealedPositions.has(i) && !skipNextSpin) {
+      const canUseWide = i < targetText.length - 1 && 
+                        !revealedPositions.has(i + 1) && 
+                        targetText[i + 1] !== ' '
+      const charResult = getRandomMatrixCharSmart(canUseWide)
+      
+      if (charResult.isWide) {
+        displayChars[i] = charResult.char
+        if (i + 1 < displayChars.length) {
+          displayChars[i + 1] = ''
         }
-      } else if (skipNextSpin) {
+        skipNextSpin = true
+      } else {
+        displayChars[i] = charResult.char
         skipNextSpin = false
       }
+    } else if (skipNextSpin) {
+      skipNextSpin = false
     }
-    currentTitle.value = displayChars.join('')
-  }, ANIMATION_CONFIG.matrixSpinSpeed)
+  }
+}
+
+const animateWordReveal = async (targetText: string): Promise<void> => {
+  const [displayChars, revealedPositions] = initializeDisplayChars(targetText)
   
-  // Wait for spin time
-  await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.matrixSpinTime))
+  // Matrix spinning phase
+  const spinInterval = setInterval(() => {
+    updateSpinningChars(displayChars, targetText, revealedPositions)
+    currentTitle.value = displayChars.join('')
+  }, TIMING_CONFIG.matrixSpinSpeed)
+  
+  await delay(TIMING_CONFIG.matrixSpinTime)
   
   // Random character reveal (exclude spaces)
   const positions = Array.from({ length: targetText.length }, (_, i) => i)
@@ -290,8 +302,7 @@ const animateWordReveal = async (targetText: string): Promise<void> => {
     revealedPositions.add(position)
     displayChars[position] = targetText[position]
     currentTitle.value = displayChars.join('')
-    
-    await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.charRevealInterval))
+    await delay(TIMING_CONFIG.charRevealInterval)
   }
   
   clearInterval(spinInterval)
@@ -301,22 +312,22 @@ const transitionToMatrix = async (currentText: string, newLength: number): Promi
   let displayChars = currentText.split('')
   const maxLength = Math.max(currentText.length, newLength)
   
-  // Extend or trim array to match new word length
+  // Adjust array length
   if (maxLength > displayChars.length) {
-    displayChars = [...displayChars, ...Array(maxLength - displayChars.length).fill('')]
+    displayChars.push(...Array(maxLength - displayChars.length).fill(''))
   } else if (maxLength < displayChars.length) {
     displayChars = displayChars.slice(0, maxLength)
   }
   
-  // Gradually convert characters to matrix chars (exclude spaces from new word)
-  const positions = Array.from({ length: currentText.length }, (_, i) => i)
+  // Gradually convert non-space characters to matrix chars
+  const nonSpacePositions = Array.from({ length: currentText.length }, (_, i) => i)
     .filter(i => currentText[i] !== ' ')
-  const shuffledPositions = positions.sort(() => Math.random() - 0.5)
+    .sort(() => Math.random() - 0.5)
   
-  for (const position of shuffledPositions) {
+  for (const position of nonSpacePositions) {
     displayChars[position] = getRandomMatrixChar()
     currentTitle.value = displayChars.join('')
-    await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.charRevealInterval * 0.2))
+    await delay(TIMING_CONFIG.charRevealInterval * 0.2)
   }
   
   // Fill remaining positions with matrix chars
@@ -327,72 +338,103 @@ const transitionToMatrix = async (currentText: string, newLength: number): Promi
 }
 
 
+// Matrix rainfall configuration
+const RAINFALL_CONFIG = {
+  chars: '01アイウエオカキクケコサシスセソタチツテト!@#$%^&*(){}[]|\\:;"<>,.?/',
+  columnSpacing: 25,
+  positionVariation: 30,
+  driftRange: { min: 20, max: 80 },
+  duration: { min: 3, max: 8 },
+  delayMax: 2,
+  segments: { min: 3, max: 5 },
+  segmentLength: { min: 2, max: 35 },
+  gapLength: { min: 3, max: 8 },
+  changeInterval: { min: 500, max: 1500 }
+} as const
+
+const calculateColumnPosition = (index: number, isRightSide: boolean, screenWidth: number) => {
+  const basePosition = isRightSide 
+    ? screenWidth - (index * RAINFALL_CONFIG.columnSpacing)
+    : index * RAINFALL_CONFIG.columnSpacing
+  
+  const variation = (Math.random() - 0.5) * RAINFALL_CONFIG.positionVariation
+  const startX = basePosition + variation
+  
+  const driftDirection = isRightSide ? -1 : 1
+  const driftAmount = Math.random() * (RAINFALL_CONFIG.driftRange.max - RAINFALL_CONFIG.driftRange.min) + RAINFALL_CONFIG.driftRange.min
+  const driftX = driftDirection * driftAmount
+  
+  return { startX, driftX }
+}
+
+const generateRandomRange = (min: number, max: number): number => {
+  return min + Math.random() * (max - min)
+}
+
+const generateRandomInt = (min: number, max: number): number => {
+  return min + Math.floor(Math.random() * (max - min + 1))
+}
+
+const generateColumnContent = (): string => {
+  let content = ''
+  const segments = generateRandomInt(RAINFALL_CONFIG.segments.min, RAINFALL_CONFIG.segments.max)
+  
+  for (let segment = 0; segment < segments; segment++) {
+    const segmentLength = generateRandomInt(RAINFALL_CONFIG.segmentLength.min, RAINFALL_CONFIG.segmentLength.max)
+    
+    // Add characters for this segment
+    for (let j = 0; j < segmentLength; j++) {
+      content += getRandomChar(RAINFALL_CONFIG.chars) + '\n'
+    }
+    
+    // Add gap between segments (except after last segment)
+    if (segment < segments - 1) {
+      const gapLength = generateRandomInt(RAINFALL_CONFIG.gapLength.min, RAINFALL_CONFIG.gapLength.max)
+      for (let k = 0; k < gapLength; k++) {
+        content += ' \n'
+      }
+    }
+  }
+  
+  return content
+}
+
+const createMatrixColumn = (index: number, isRightSide: boolean, screenWidth: number): HTMLElement => {
+  const column = document.createElement('div')
+  column.className = isRightSide ? 'matrix-column-right' : 'matrix-column'
+  
+  const { startX, driftX } = calculateColumnPosition(index, isRightSide, screenWidth)
+  
+  column.style.left = `${startX}px`
+  column.style.setProperty('--drift-x', `${driftX}px`)
+  
+  // Set random animation timing
+  const duration = generateRandomRange(RAINFALL_CONFIG.duration.min, RAINFALL_CONFIG.duration.max)
+  const animationDelay = Math.random() * RAINFALL_CONFIG.delayMax
+  
+  column.style.animationDuration = `${duration}s`
+  column.style.animationDelay = `${animationDelay}s`
+  
+  column.textContent = generateColumnContent()
+  
+  // Change characters periodically
+  const changeInterval = generateRandomRange(RAINFALL_CONFIG.changeInterval.min, RAINFALL_CONFIG.changeInterval.max)
+  
+  setInterval(() => {
+    if (column.parentNode) {
+      column.textContent = generateColumnContent()
+    }
+  }, changeInterval)
+  
+  return column
+}
+
 const createMatrixRainfall = (container: HTMLElement, isRightSide: boolean = false): void => {
-  const matrixChars = '01アイウエオカキクケコサシスセソタチツテト!@#$%^&*(){}[]|\\:;"<>,.?/'
   const screenWidth = window.innerWidth
-  const columnCount = Math.floor(screenWidth / 25) // More columns for better coverage
+  const columnCount = Math.floor(screenWidth / RAINFALL_CONFIG.columnSpacing)
   
   for (let i = 0; i < columnCount; i++) {
-    const column = document.createElement('div')
-    column.className = isRightSide ? 'matrix-column-right' : 'matrix-column'
-    
-    let startX, driftX
-    
-    if (isRightSide) {
-      // Right side: start from right edge, drift leftward
-      startX = screenWidth - (i * 25) + (Math.random() - 0.5) * 30
-      driftX = -(Math.random() * 60 + 20) // Drift left (-20 to -80px)
-    } else {
-      // Left side: start from left edge, drift rightward  
-      startX = i * 25 + (Math.random() - 0.5) * 30
-      driftX = Math.random() * 60 + 20 // Drift right (20 to 80px)
-    }
-    
-    column.style.left = `${startX}px`
-    column.style.setProperty('--drift-x', `${driftX}px`)
-    
-    // Random animation duration between 3-8 seconds
-    const duration = 3 + Math.random() * 5
-    column.style.animationDuration = `${duration}s`
-    
-    // Random animation delay to stagger columns
-    const delay = Math.random() * 2
-    column.style.animationDelay = `${delay}s`
-    
-    // Generate initial column content with gaps and segments
-    const generateContent = () => {
-      let content = ''
-      const segments = 3 + Math.floor(Math.random() * 3) // 3-5 segments per column
-      
-      for (let segment = 0; segment < segments; segment++) {
-        // Add characters for this segment
-        const segmentLength = 2 + Math.floor(Math.random() * 35) // 8-20 characters per segment
-        for (let j = 0; j < segmentLength; j++) {
-          content += matrixChars[Math.floor(Math.random() * matrixChars.length)]
-          content += '\n'
-        }
-        
-        // Add gap between segments (except after last segment)
-        if (segment < segments - 1) {
-          const gapLength = 3 + Math.floor(Math.random() * 8) // 3-8 empty lines
-          for (let k = 0; k < gapLength; k++) {
-            content += ' \n'
-          }
-        }
-      }
-      
-      return content
-    }
-    
-    column.textContent = generateContent()
-    
-    // Change characters periodically
-    setInterval(() => {
-      if (column.parentNode) {
-        column.textContent = generateContent()
-      }
-    }, 500 + Math.random() * 1000) // Change every 0.5-1.5 seconds
-    
+    const column = createMatrixColumn(i, isRightSide, screenWidth)
     container.appendChild(column)
   }
 }
@@ -406,112 +448,110 @@ const createMatrixRainfalls = (): void => {
   }
 }
 
-const generateRandomWordCombination = (): string[] => {
-  const spinChars = ANIMATION_CONFIG.finalSpinChars
-  const spinCharsWide = ANIMATION_CONFIG.finalSpinCharsWide
+// Final animation word combinations
+const WORD_COMBINATIONS = [
+  // 4 single chars
+  () => Array.from({ length: 4 }, () => getRandomChar(CHARACTER_SETS.finalSpin)),
   
-  // Generate random combinations that fit in 4 positions
-  const combinations = [
-    // 4 single chars
-    () => Array.from({length: 4}, () => spinChars[Math.floor(Math.random() * spinChars.length)]),
-    // 1 wide + 2 single chars  
-    () => {
-      const wide = spinCharsWide[Math.floor(Math.random() * spinCharsWide.length)]
-      const single1 = spinChars[Math.floor(Math.random() * spinChars.length)]
-      const single2 = spinChars[Math.floor(Math.random() * spinChars.length)]
-      return [wide, '', single1, single2] // wide spans 2 positions
-    },
-    // 2 single + 1 wide chars
-    () => {
-      const single1 = spinChars[Math.floor(Math.random() * spinChars.length)]
-      const single2 = spinChars[Math.floor(Math.random() * spinChars.length)]
-      const wide = spinCharsWide[Math.floor(Math.random() * spinCharsWide.length)]
-      return [single1, single2, wide, ''] // wide spans 2 positions
-    },
-    // 2 wide chars (each spans 2 positions)
-    () => {
-      const wide1 = spinCharsWide[Math.floor(Math.random() * spinCharsWide.length)]
-      const wide2 = spinCharsWide[Math.floor(Math.random() * spinCharsWide.length)]
-      return [wide1, '', wide2, '']
-    }
+  // 1 wide + 2 single chars  
+  () => [
+    getRandomChar(CHARACTER_SETS.finalSpinWide),
+    '', 
+    getRandomChar(CHARACTER_SETS.finalSpin),
+    getRandomChar(CHARACTER_SETS.finalSpin)
+  ],
+  
+  // 2 single + 1 wide chars
+  () => [
+    getRandomChar(CHARACTER_SETS.finalSpin),
+    getRandomChar(CHARACTER_SETS.finalSpin),
+    getRandomChar(CHARACTER_SETS.finalSpinWide),
+    ''
+  ],
+  
+  // 2 wide chars (each spans 2 positions)
+  () => [
+    getRandomChar(CHARACTER_SETS.finalSpinWide),
+    '',
+    getRandomChar(CHARACTER_SETS.finalSpinWide),
+    ''
   ]
-  
-  const randomCombination = combinations[Math.floor(Math.random() * combinations.length)]
+] as const
+
+const generateRandomWordCombination = (): string[] => {
+  const randomCombination = WORD_COMBINATIONS[Math.floor(Math.random() * WORD_COMBINATIONS.length)]
   return randomCombination()
+}
+
+// Final animation phases
+
+const animatePhaseHiding = async (wordStart: number, finalSpinSpeed: number): Promise<void> => {
+  const hidePositions = [0, 1, 2, 3].sort(() => Math.random() - 0.5)
+  
+  for (const pos of hidePositions) {
+    const currentDisplay = currentTitle.value.split('')
+    const randomChar = getRandomChar(CHARACTER_SETS.finalSpin)
+    currentDisplay[wordStart + pos] = randomChar
+    currentTitle.value = currentDisplay.join('')
+    await delay(finalSpinSpeed)
+  }
+}
+
+const animatePhaseSpinning = async (wordStart: number, finalSpinSpeed: number): Promise<void> => {
+  const spinSteps = Math.floor(TIMING_CONFIG.finalSpinDuration / finalSpinSpeed) - 8
+  
+  for (let i = 0; i < spinSteps; i++) {
+    const currentDisplay = currentTitle.value.split('')
+    const randomCombination = generateRandomWordCombination()
+    
+    for (let j = 0; j < 4; j++) {
+      if (wordStart + j < currentDisplay.length) {
+        currentDisplay[wordStart + j] = randomCombination[j]
+      }
+    }
+    
+    currentTitle.value = currentDisplay.join('')
+    await delay(finalSpinSpeed)
+  }
+}
+
+const animatePhaseRevealing = async (wordStart: number, finalSpinSpeed: number): Promise<void> => {
+  const finalChar = getRandomChar(CHARACTER_SETS.finalLanding)
+  const finalWord = ['s', 'h', finalChar, 't']
+  const revealPositions = [0, 1, 2, 3].sort(() => Math.random() - 0.5)
+  
+  for (const pos of revealPositions) {
+    const currentDisplay = currentTitle.value.split('')
+    currentDisplay[wordStart + pos] = finalWord[pos]
+    currentTitle.value = currentDisplay.join('')
+    await delay(finalSpinSpeed)
+  }
 }
 
 const startFinalSpinAnimation = (): void => {
   const secondWord = 'Building cool sh#t'
-  const wordStart = secondWord.indexOf('sh#t') // Start of "sh#t"
+  const wordStart = secondWord.indexOf('sh#t')
   
-  const spinChar = async () => {
-    const landingChars = ANIMATION_CONFIG.finalLandingChars
-    const finalSpinSpeed = ANIMATION_CONFIG.matrixSpinSpeed * 1.2 // Slightly slower (120ms instead of 100ms)
+  const executeSpinCycle = async (): Promise<void> => {
+    const finalSpinSpeed = TIMING_CONFIG.matrixSpinSpeed * 1.2
     
-    // Phase 1: Gradual hiding - start replacing chars one by one with random chars
-    const hidePositions = [0, 1, 2, 3].sort(() => Math.random() - 0.5) // Random order
-    
-    for (const pos of hidePositions) {
-      let currentDisplay = currentTitle.value.split('')
-      const randomChar = ANIMATION_CONFIG.finalSpinChars[Math.floor(Math.random() * ANIMATION_CONFIG.finalSpinChars.length)]
-      currentDisplay[wordStart + pos] = randomChar
-      currentTitle.value = currentDisplay.join('')
-      await new Promise<void>(resolve => setTimeout(resolve, finalSpinSpeed))
-    }
-    
-    // Phase 2: Full spinning animation with random combinations
-    const spinSteps = Math.floor(ANIMATION_CONFIG.finalSpinDuration / finalSpinSpeed) - 8 // Subtract hiding and revealing steps
-    for (let i = 0; i < spinSteps; i++) {
-      let currentDisplay = currentTitle.value.split('')
-      
-      // Generate random 4-character combination
-      const randomCombination = generateRandomWordCombination()
-      
-      // Replace the "sh#t" part with random combination
-      for (let j = 0; j < 4; j++) {
-        if (wordStart + j < currentDisplay.length) {
-          currentDisplay[wordStart + j] = randomCombination[j]
-        }
-      }
-      
-      currentTitle.value = currentDisplay.join('')
-      await new Promise<void>(resolve => setTimeout(resolve, finalSpinSpeed))
-    }
-    
-    // Phase 3: Gradual revealing - reveal final word one char at a time
-    const finalChar = landingChars[Math.floor(Math.random() * landingChars.length)]
-    const finalWord = ['s', 'h', finalChar, 't']
-    const revealPositions = [0, 1, 2, 3].sort(() => Math.random() - 0.5) // Random order
-    
-    for (const pos of revealPositions) {
-      let currentDisplay = currentTitle.value.split('')
-      currentDisplay[wordStart + pos] = finalWord[pos]
-      currentTitle.value = currentDisplay.join('')
-      await new Promise<void>(resolve => setTimeout(resolve, finalSpinSpeed))
-    }
+    await animatePhaseHiding(wordStart, finalSpinSpeed)
+    await animatePhaseSpinning(wordStart, finalSpinSpeed)
+    await animatePhaseRevealing(wordStart, finalSpinSpeed)
   }
   
-  // Start the recurring spin animation
-  setInterval(spinChar, ANIMATION_CONFIG.finalSpinInterval)
+  setInterval(executeSpinCycle, TIMING_CONFIG.finalSpinInterval)
 }
 
 const startAnimation = async (): Promise<void> => {
   const firstWord = 'Software Engineer'
   const secondWord = 'Building cool sh#t'
   
-  // Animate first word
   await animateWordReveal(firstWord)
-  
-  // Wait between words
-  await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.betweenWordsTime))
-  
-  // Transition first word back to matrix chars
+  await delay(TIMING_CONFIG.betweenWordsTime)
   await transitionToMatrix(firstWord, secondWord.length)
-  
-  // Animate second word
   await animateWordReveal(secondWord)
   
-  // Immediately start final spinning
   startFinalSpinAnimation()
 }
 
