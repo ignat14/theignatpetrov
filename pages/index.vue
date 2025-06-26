@@ -2,9 +2,11 @@
   <div class="parallax-container">
     <!-- Hero Section -->
     <section class="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white flex items-center justify-center relative overflow-hidden">
-      <!-- Matrix-style background effect -->
-      <div class="absolute inset-0 opacity-10">
-        <div class="matrix-bg"></div>
+      <!-- Matrix rainfall background effect -->
+      <div ref="matrixContainer" class="absolute inset-0 opacity-10 overflow-hidden">
+      </div>
+      <!-- Right side Matrix rainfall background effect -->
+      <div ref="matrixContainerRight" class="absolute inset-0 opacity-5 overflow-hidden">
       </div>
       
       <div class="text-center z-10 relative">
@@ -170,6 +172,8 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import type { BlogPost } from '~/types/blog'
 
 const currentTitle = ref<string>('')
+const matrixContainer = ref<HTMLElement>()
+const matrixContainerRight = ref<HTMLElement>()
 const { isLoadingAnalytics, fetchAnalytics, updateBlogPosts } = useAnalytics()
 const { getLatestPosts } = useBlogPosts()
 
@@ -265,6 +269,75 @@ const transitionToMatrix = async (currentText: string, newLength: number): Promi
 }
 
 
+const createMatrixRainfall = (container: HTMLElement, isRightSide: boolean = false): void => {
+  const matrixChars = '01アイウエオカキクケコサシスセソタチツテト!@#$%^&*(){}[]|\\:;"<>,.?/'
+  const screenWidth = window.innerWidth
+  const columnCount = Math.floor(screenWidth / 40) // Fewer columns, spread across half screen
+  
+  for (let i = 0; i < columnCount; i++) {
+    const column = document.createElement('div')
+    column.className = isRightSide ? 'matrix-column-right' : 'matrix-column'
+    
+    let startX, driftX
+    
+    if (isRightSide) {
+      // Right side: start from right edge, drift leftward
+      startX = screenWidth - (i * 40) + (Math.random() - 0.5) * 40
+      driftX = -(Math.random() * 60 + 20) // Drift left (-20 to -80px)
+    } else {
+      // Left side: start from left edge, drift rightward  
+      startX = i * 40 + (Math.random() - 0.5) * 40
+      driftX = Math.random() * 60 + 20 // Drift right (20 to 80px)
+    }
+    
+    column.style.left = `${startX}px`
+    column.style.setProperty('--drift-x', `${driftX}px`)
+    
+    // Random animation duration between 3-8 seconds
+    const duration = 3 + Math.random() * 5
+    column.style.animationDuration = `${duration}s`
+    
+    // Random animation delay to stagger columns
+    const delay = Math.random() * 2
+    column.style.animationDelay = `${delay}s`
+    
+    // Generate initial column content with gaps
+    const contentLength = 50 + Math.floor(Math.random() * 30) // 50-80 characters
+    const generateContent = () => {
+      let content = ''
+      for (let j = 0; j < contentLength; j++) {
+        if (Math.random() < 0.8) { // 80% chance of character, 20% chance of space
+          content += matrixChars[Math.floor(Math.random() * matrixChars.length)]
+        } else {
+          content += ' '
+        }
+        content += '\n'
+      }
+      return content
+    }
+    
+    column.textContent = generateContent()
+    
+    // Change characters periodically
+    setInterval(() => {
+      if (column.parentNode) {
+        column.textContent = generateContent()
+      }
+    }, 500 + Math.random() * 1000) // Change every 0.5-1.5 seconds
+    
+    container.appendChild(column)
+  }
+}
+
+const createMatrixRainfalls = (): void => {
+  if (matrixContainer.value) {
+    createMatrixRainfall(matrixContainer.value, false) // Left side
+  }
+  if (matrixContainerRight.value) {
+    createMatrixRainfall(matrixContainerRight.value, true) // Right side
+  }
+}
+
 const startFinalSpinAnimation = (): void => {
   const secondWord = 'Building cool sh#t'
   const targetPosition = secondWord.length - 2 // Second to last character ('#')
@@ -336,6 +409,7 @@ const formatDate = (dateString: string): string => {
 }
 
 onMounted(async () => {
+  createMatrixRainfalls()
   startAnimation()
   // Add parallax scroll listener
   window.addEventListener('scroll', handleParallax)
@@ -352,19 +426,66 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.matrix-bg {
-  background-image: 
-    linear-gradient(90deg, transparent 98%, #00ff00 100%),
-    linear-gradient(transparent 98%, #00ff00 100%);
-  background-size: 20px 20px;
-  width: 100%;
-  height: 100%;
-  animation: matrix-rain 20s linear infinite;
+.matrix-column,
+.matrix-column-right {
+  position: absolute;
+  top: -100vh;
+  width: 20px;
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 14px;
+  white-space: pre;
+  text-shadow: 0 0 2px #00ff00;
+  --drift-x: 0px;
 }
 
-@keyframes matrix-rain {
-  0% { transform: translateY(-100vh); }
-  100% { transform: translateY(100vh); }
+.matrix-column {
+  animation: matrix-column-fall linear infinite;
+}
+
+.matrix-column-right {
+  animation: matrix-column-fall-right linear infinite;
+}
+
+@keyframes matrix-column-fall {
+  0% { 
+    transform: translateY(-100vh) translateX(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(0) translateX(calc(var(--drift-x) * 0.5));
+  }
+  95% {
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(100vh) translateX(var(--drift-x));
+    opacity: 0;
+  }
+}
+
+@keyframes matrix-column-fall-right {
+  0% { 
+    transform: translateY(-100vh) translateX(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(0) translateX(calc(var(--drift-x) * 0.5));
+  }
+  95% {
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(100vh) translateX(var(--drift-x));
+    opacity: 0;
+  }
 }
 
 .hero-title {
