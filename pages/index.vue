@@ -184,7 +184,7 @@ const ANIMATION_CONFIG = {
   betweenWordsTime: 2000,             // Time between first and second word (ms)
   secondWordSpinTime: 1000,           // Time to spin second word before revealing (ms)
   finalSpinChars: '!@#$%^&{}][041',   // Characters for final spinning animation
-  finalLandingChars: '!@#*?',         // Characters to land on after spinning
+  finalLandingChars: '#*?',         // Characters to land on after spinning
   finalSpinInterval: 3000,            // Time between each final spin cycle (ms)
   finalSpinDuration: 1000             // Duration of each spinning animation (ms)
 }
@@ -306,8 +306,7 @@ const startAnimation = async (): Promise<void> => {
   // Animate second word
   await animateWordReveal(secondWord)
   
-  // Wait 2 seconds after final word reveal, then start final spinning
-  await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.finalSpinInterval))
+  // Immediately start final spinning
   startFinalSpinAnimation()
 }
 
