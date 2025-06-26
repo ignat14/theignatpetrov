@@ -8,7 +8,7 @@
       </div>
       
       <div class="text-center z-10 relative">
-        <h1 class="font-saira text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-8 text-white text-center px-4">
+        <h1 class="font-saira text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-8 text-white text-center px-4 hero-title">
           Ignat Petrov
         </h1>
         <div class="h-12 sm:h-16 flex items-center justify-center px-4">
@@ -264,6 +264,7 @@ const transitionToMatrix = async (currentText: string, newLength: number): Promi
   currentTitle.value = displayChars.join('')
 }
 
+
 const startFinalSpinAnimation = (): void => {
   const secondWord = 'Building cool sh#t'
   const targetPosition = secondWord.length - 2 // Second to last character ('#')
@@ -364,6 +365,20 @@ onUnmounted(() => {
 @keyframes matrix-rain {
   0% { transform: translateY(-100vh); }
   100% { transform: translateY(100vh); }
+}
+
+.hero-title {
+  letter-spacing: 0.8em;
+  animation: hero-spacing 4s ease-out forwards;
+}
+
+@keyframes hero-spacing {
+  from {
+    letter-spacing: 0.1em;
+  }
+  to {
+    letter-spacing: 0;
+  }
 }
 
 .matrix-text {
