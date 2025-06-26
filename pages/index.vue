@@ -3,11 +3,14 @@
     <!-- Hero Section -->
     <section class="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white flex items-center justify-center relative overflow-hidden">
       <!-- Matrix rainfall background effect -->
-      <div ref="matrixContainer" class="absolute inset-0 opacity-10 overflow-hidden">
+      <div ref="matrixContainer" class="absolute inset-0 overflow-hidden matrix-fade-in matrix-left">
       </div>
       <!-- Right side Matrix rainfall background effect -->
-      <div ref="matrixContainerRight" class="absolute inset-0 opacity-5 overflow-hidden">
+      <div ref="matrixContainerRight" class="absolute inset-0 overflow-hidden matrix-fade-in matrix-right">
       </div>
+      
+      <!-- Text separation gradient background -->
+      <div class="absolute inset-0 z-5 hero-gradient"></div>
       
       <div class="text-center z-10 relative">
         <h1 class="font-saira text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-8 text-white text-center px-4 hero-title">
@@ -272,7 +275,7 @@ const transitionToMatrix = async (currentText: string, newLength: number): Promi
 const createMatrixRainfall = (container: HTMLElement, isRightSide: boolean = false): void => {
   const matrixChars = '01アイウエオカキクケコサシスセソタチツテト!@#$%^&*(){}[]|\\:;"<>,.?/'
   const screenWidth = window.innerWidth
-  const columnCount = Math.floor(screenWidth / 40) // Fewer columns, spread across half screen
+  const columnCount = Math.floor(screenWidth / 25) // More columns for better coverage
   
   for (let i = 0; i < columnCount; i++) {
     const column = document.createElement('div')
@@ -282,11 +285,11 @@ const createMatrixRainfall = (container: HTMLElement, isRightSide: boolean = fal
     
     if (isRightSide) {
       // Right side: start from right edge, drift leftward
-      startX = screenWidth - (i * 40) + (Math.random() - 0.5) * 40
+      startX = screenWidth - (i * 25) + (Math.random() - 0.5) * 30
       driftX = -(Math.random() * 60 + 20) // Drift left (-20 to -80px)
     } else {
       // Left side: start from left edge, drift rightward  
-      startX = i * 40 + (Math.random() - 0.5) * 40
+      startX = i * 25 + (Math.random() - 0.5) * 30
       driftX = Math.random() * 60 + 20 // Drift right (20 to 80px)
     }
     
@@ -301,18 +304,28 @@ const createMatrixRainfall = (container: HTMLElement, isRightSide: boolean = fal
     const delay = Math.random() * 2
     column.style.animationDelay = `${delay}s`
     
-    // Generate initial column content with gaps
-    const contentLength = 50 + Math.floor(Math.random() * 30) // 50-80 characters
+    // Generate initial column content with gaps and segments
     const generateContent = () => {
       let content = ''
-      for (let j = 0; j < contentLength; j++) {
-        if (Math.random() < 0.8) { // 80% chance of character, 20% chance of space
+      const segments = 3 + Math.floor(Math.random() * 3) // 3-5 segments per column
+      
+      for (let segment = 0; segment < segments; segment++) {
+        // Add characters for this segment
+        const segmentLength = 2 + Math.floor(Math.random() * 35) // 8-20 characters per segment
+        for (let j = 0; j < segmentLength; j++) {
           content += matrixChars[Math.floor(Math.random() * matrixChars.length)]
-        } else {
-          content += ' '
+          content += '\n'
         }
-        content += '\n'
+        
+        // Add gap between segments (except after last segment)
+        if (segment < segments - 1) {
+          const gapLength = 3 + Math.floor(Math.random() * 8) // 3-8 empty lines
+          for (let k = 0; k < gapLength; k++) {
+            content += ' \n'
+          }
+        }
       }
+      
       return content
     }
     
@@ -486,6 +499,48 @@ onUnmounted(() => {
     transform: translateY(100vh) translateX(var(--drift-x));
     opacity: 0;
   }
+}
+
+.matrix-fade-in {
+  opacity: 0;
+  animation: matrix-appear 5s ease-out forwards;
+}
+
+.matrix-left {
+  animation: matrix-appear-left 5s ease-out forwards;
+}
+
+.matrix-right {
+  animation: matrix-appear-right 5s ease-out forwards;
+}
+
+@keyframes matrix-appear-left {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.05;
+  }
+}
+
+@keyframes matrix-appear-right {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.02;
+  }
+}
+
+.hero-gradient {
+  background: radial-gradient(
+    ellipse 60% 40% at 50% 50%,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.6) 30%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.1) 70%,
+    transparent 100%
+  );
 }
 
 .hero-title {
