@@ -406,26 +406,89 @@ const createMatrixRainfalls = (): void => {
   }
 }
 
+const generateRandomWordCombination = (): string[] => {
+  const spinChars = ANIMATION_CONFIG.finalSpinChars
+  const spinCharsWide = ANIMATION_CONFIG.finalSpinCharsWide
+  
+  // Generate random combinations that fit in 4 positions
+  const combinations = [
+    // 4 single chars
+    () => Array.from({length: 4}, () => spinChars[Math.floor(Math.random() * spinChars.length)]),
+    // 1 wide + 2 single chars  
+    () => {
+      const wide = spinCharsWide[Math.floor(Math.random() * spinCharsWide.length)]
+      const single1 = spinChars[Math.floor(Math.random() * spinChars.length)]
+      const single2 = spinChars[Math.floor(Math.random() * spinChars.length)]
+      return [wide, '', single1, single2] // wide spans 2 positions
+    },
+    // 2 single + 1 wide chars
+    () => {
+      const single1 = spinChars[Math.floor(Math.random() * spinChars.length)]
+      const single2 = spinChars[Math.floor(Math.random() * spinChars.length)]
+      const wide = spinCharsWide[Math.floor(Math.random() * spinCharsWide.length)]
+      return [single1, single2, wide, ''] // wide spans 2 positions
+    },
+    // 2 wide chars (each spans 2 positions)
+    () => {
+      const wide1 = spinCharsWide[Math.floor(Math.random() * spinCharsWide.length)]
+      const wide2 = spinCharsWide[Math.floor(Math.random() * spinCharsWide.length)]
+      return [wide1, '', wide2, '']
+    }
+  ]
+  
+  const randomCombination = combinations[Math.floor(Math.random() * combinations.length)]
+  return randomCombination()
+}
+
 const startFinalSpinAnimation = (): void => {
   const secondWord = 'Building cool sh#t'
-  const targetPosition = secondWord.length - 2 // Second to last character ('#')
+  const wordStart = secondWord.indexOf('sh#t') // Start of "sh#t"
   
   const spinChar = async () => {
-    const spinChars = ANIMATION_CONFIG.finalSpinChars
     const landingChars = ANIMATION_CONFIG.finalLandingChars
-    const currentDisplay = currentTitle.value.split('')
+    const finalSpinSpeed = ANIMATION_CONFIG.matrixSpinSpeed * 1.2 // Slightly slower (120ms instead of 100ms)
     
-    // 1 second spinning animation
-    const spinSteps = Math.floor(ANIMATION_CONFIG.finalSpinDuration / ANIMATION_CONFIG.matrixSpinSpeed)
-    for (let i = 0; i < spinSteps; i++) {
-      currentDisplay[targetPosition] = spinChars[Math.floor(Math.random() * spinChars.length)]
+    // Phase 1: Gradual hiding - start replacing chars one by one with random chars
+    const hidePositions = [0, 1, 2, 3].sort(() => Math.random() - 0.5) // Random order
+    
+    for (const pos of hidePositions) {
+      let currentDisplay = currentTitle.value.split('')
+      const randomChar = ANIMATION_CONFIG.finalSpinChars[Math.floor(Math.random() * ANIMATION_CONFIG.finalSpinChars.length)]
+      currentDisplay[wordStart + pos] = randomChar
       currentTitle.value = currentDisplay.join('')
-      await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.matrixSpinSpeed))
+      await new Promise<void>(resolve => setTimeout(resolve, finalSpinSpeed))
     }
     
-    // Land on final random character from landing set and stick for 2 seconds
-    currentDisplay[targetPosition] = landingChars[Math.floor(Math.random() * landingChars.length)]
-    currentTitle.value = currentDisplay.join('')
+    // Phase 2: Full spinning animation with random combinations
+    const spinSteps = Math.floor(ANIMATION_CONFIG.finalSpinDuration / finalSpinSpeed) - 8 // Subtract hiding and revealing steps
+    for (let i = 0; i < spinSteps; i++) {
+      let currentDisplay = currentTitle.value.split('')
+      
+      // Generate random 4-character combination
+      const randomCombination = generateRandomWordCombination()
+      
+      // Replace the "sh#t" part with random combination
+      for (let j = 0; j < 4; j++) {
+        if (wordStart + j < currentDisplay.length) {
+          currentDisplay[wordStart + j] = randomCombination[j]
+        }
+      }
+      
+      currentTitle.value = currentDisplay.join('')
+      await new Promise<void>(resolve => setTimeout(resolve, finalSpinSpeed))
+    }
+    
+    // Phase 3: Gradual revealing - reveal final word one char at a time
+    const finalChar = landingChars[Math.floor(Math.random() * landingChars.length)]
+    const finalWord = ['s', 'h', finalChar, 't']
+    const revealPositions = [0, 1, 2, 3].sort(() => Math.random() - 0.5) // Random order
+    
+    for (const pos of revealPositions) {
+      let currentDisplay = currentTitle.value.split('')
+      currentDisplay[wordStart + pos] = finalWord[pos]
+      currentTitle.value = currentDisplay.join('')
+      await new Promise<void>(resolve => setTimeout(resolve, finalSpinSpeed))
+    }
   }
   
   // Start the recurring spin animation
