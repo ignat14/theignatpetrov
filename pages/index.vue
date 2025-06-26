@@ -175,96 +175,62 @@ const { getLatestPosts } = useBlogPosts()
 
 const latestPosts = ref<BlogPost[]>([])
 
-const revealTitle = async (title: string): Promise<void> => {
-  const chars = '0123456789@#$%^&*?><|\\;:~{}[]'
-  
-  // Create different rhythms for each character position
-  const rhythms = Array.from({ length: title.length }, (_, i) => {
-    return Math.floor(Math.random() * 4) + 2 // Random rhythm between 2-5
-  })
-  
-  // Track current characters at each position
-  let currentChars = Array.from({ length: title.length }, () => 
-    chars[Math.floor(Math.random() * chars.length)]
-  )
-  
-  // Show matrix characters then reveal from left to right
-  for (let step = 0; step <= 45; step++) {
-    let newTitle = ''
-    const progress = step / 45
-    
-    for (let i = 0; i < title.length; i++) {
-      if (progress < 0.3) {
-        // Show random matrix characters with different rhythms
-        const shouldChange = step % rhythms[i] === 0
-        if (shouldChange) {
-          currentChars[i] = chars[Math.floor(Math.random() * chars.length)]
-        }
-        newTitle += currentChars[i]
-      } else {
-        // Reveal from left to right more gradually
-        const revealProgress = (progress - 0.8) / 0.2
-        const revealPosition = revealProgress * title.length
-        
-        if (i < revealPosition - 2) {
-          newTitle += title[i]
-        } else if (i <= revealPosition + 2) {
-          newTitle += Math.random() < 0.3 ? title[i] : chars[Math.floor(Math.random() * chars.length)]
-        } else {
-          newTitle += chars[Math.floor(Math.random() * chars.length)]
-        }
-      }
-    }
-    
-    currentTitle.value = newTitle
-    await new Promise<void>(resolve => setTimeout(resolve, 80))
-  }
-  
-  currentTitle.value = title
+// Animation configuration
+const ANIMATION_CONFIG = {
+  matrixChars: '!@#$%{}[]\\/?><;',    // Characters used for matrix effect
+  matrixSpinTime: 1000,               // Time to spin matrix chars before revealing (ms)
+  charRevealInterval: 150,            // Time between each character reveal (ms)
+  matrixSpinSpeed: 100,               // Speed of matrix character changes (ms)
+  betweenRevealsTime: 4000            // Time between first and second reveal
 }
 
-const transitionTitle = async (fromTitle: string, toTitle: string): Promise<void> => {
-  const chars = '0123456789@#$%^&*?><|\\;:~{}[]'
-  const maxLength = Math.max(fromTitle.length, toTitle.length)
-  
-  // Transition from first to second title, left to right
-  for (let step = 0; step <= 25; step++) {
-    let newTitle = ''
-    const progress = step / 25
-    const changePosition = progress * maxLength
-    
-    for (let i = 0; i < maxLength; i++) {
-      if (i < changePosition - 2) {
-        // Already changed - show target character
-        newTitle += toTitle[i] || ' '
-      } else if (i <= changePosition + 2) {
-        // In transition zone - mix of matrix chars and target
-        if (Math.random() < 0.3) {
-          newTitle += toTitle[i] || ' '
-        } else {
-          newTitle += chars[Math.floor(Math.random() * chars.length)]
-        }
-      } else {
-        // Not yet changed - show original character
-        newTitle += fromTitle[i] || ' '
-      }
-    }
-    
-    currentTitle.value = newTitle.trim()
-    await new Promise<void>(resolve => setTimeout(resolve, 100))
-  }
-  
-  currentTitle.value = toTitle
+const getRandomMatrixChar = (): string => {
+  const chars = ANIMATION_CONFIG.matrixChars
+  return chars[Math.floor(Math.random() * chars.length)]
 }
 
 const startAnimation = async (): Promise<void> => {
-  // Show first title: "Software Engineer"
-  await revealTitle('Software Engineer')
-  await new Promise<void>(resolve => setTimeout(resolve, 4000))
+  const targetText = 'Software Engineer'
+  const secondTitle = 'Building cool sh#t'
   
-  // Gradually transition to second title
-  await transitionTitle('Software Engineer', 'Building cool sh#t')
-  // Stay on second title - no more switching
+  // Initialize display with matrix chars
+  let displayChars = Array.from({ length: targetText.length }, () => getRandomMatrixChar())
+  let revealedPositions = new Set<number>()
+  
+  // Phase 1: Matrix spinning before reveal
+  const spinInterval = setInterval(() => {
+    // Update unrevealed positions with new matrix chars
+    displayChars = displayChars.map((char, index) => 
+      revealedPositions.has(index) ? char : getRandomMatrixChar()
+    )
+    currentTitle.value = displayChars.join('')
+  }, ANIMATION_CONFIG.matrixSpinSpeed)
+  
+  // Wait for spin time
+  await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.matrixSpinTime))
+  
+  // Phase 2: Random character reveal
+  const positions = Array.from({ length: targetText.length }, (_, i) => i)
+  const shuffledPositions = positions.sort(() => Math.random() - 0.5)
+  
+  for (const position of shuffledPositions) {
+    // Reveal the real character at this position
+    revealedPositions.add(position)
+    displayChars[position] = targetText[position]
+    currentTitle.value = displayChars.join('')
+    
+    // Wait before revealing next character
+    await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.charRevealInterval))
+  }
+  
+  // Stop matrix spinning
+  clearInterval(spinInterval)
+  
+  // Wait between reveals
+  await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.betweenRevealsTime))
+  
+  // Simple transition to second title
+  currentTitle.value = secondTitle
 }
 
 const handleParallax = () => {
