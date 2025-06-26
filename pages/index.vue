@@ -184,13 +184,15 @@ const latestPosts = ref<BlogPost[]>([])
 
 // Animation configuration
 const ANIMATION_CONFIG = {
-  matrixChars: '!@#$%{}[]\\/?><;',    // Characters used for matrix effect
+  matrixChars: '!@#$%{}[]\\/?><;01',   // Single-width characters for matrix effect
+  matrixCharsWide: 'アイウエオカキクケコサシスセソタチツテト', // Double-width characters
   matrixSpinTime: 1000,               // Time to spin matrix chars before revealing (ms)
   charRevealInterval: 150,            // Time between each character reveal (ms)
   matrixSpinSpeed: 100,               // Speed of matrix character changes (ms)
   betweenWordsTime: 2000,             // Time between first and second word (ms)
   secondWordSpinTime: 1000,           // Time to spin second word before revealing (ms)
-  finalSpinChars: '!@#$%^&{}][041',   // Characters for final spinning animation
+  finalSpinChars: '01!@#$%^&*(){}[]|\\:;"<>,.?/',   // Characters for final spinning animation
+  finalSpinCharsWide: 'アイウエオカキクケコサシスセソタチツテト', // Double-width final spin chars
   finalLandingChars: '#*?',         // Characters to land on after spinning
   finalSpinInterval: 3000,            // Time between each final spin cycle (ms)
   finalSpinDuration: 1000             // Duration of each spinning animation (ms)
@@ -201,25 +203,78 @@ const getRandomMatrixChar = (): string => {
   return chars[Math.floor(Math.random() * chars.length)]
 }
 
+const getRandomMatrixCharSmart = (canUseWide: boolean = true): { char: string, isWide: boolean } => {
+  const useWide = canUseWide && Math.random() < 0.3 // 30% chance for wide chars when available
+  
+  if (useWide) {
+    const wideChars = ANIMATION_CONFIG.matrixCharsWide
+    return {
+      char: wideChars[Math.floor(Math.random() * wideChars.length)],
+      isWide: true
+    }
+  } else {
+    const chars = ANIMATION_CONFIG.matrixChars
+    return {
+      char: chars[Math.floor(Math.random() * chars.length)],
+      isWide: false
+    }
+  }
+}
+
 const animateWordReveal = async (targetText: string): Promise<void> => {
   // Initialize display with matrix chars, but keep spaces fixed
   let displayChars = Array.from({ length: targetText.length }, (_, index) => 
-    targetText[index] === ' ' ? ' ' : getRandomMatrixChar()
+    targetText[index] === ' ' ? ' ' : ' ' // Start with spaces, will be filled by smart char generation
   )
   let revealedPositions = new Set<number>()
+  let skipNext = false
   
-  // Mark space positions as already revealed
+  // Mark space positions as already revealed and generate initial matrix chars
   for (let i = 0; i < targetText.length; i++) {
     if (targetText[i] === ' ') {
       revealedPositions.add(i)
+      displayChars[i] = ' '
+    } else if (!skipNext) {
+      const canUseWide = i < targetText.length - 1 && targetText[i + 1] !== ' '
+      const charResult = getRandomMatrixCharSmart(canUseWide)
+      
+      if (charResult.isWide) {
+        displayChars[i] = charResult.char
+        if (i + 1 < targetText.length) {
+          displayChars[i + 1] = '' // Second half of wide char
+        }
+        skipNext = true
+      } else {
+        displayChars[i] = charResult.char
+        skipNext = false
+      }
+    } else {
+      skipNext = false
     }
   }
   
   // Matrix spinning phase
   const spinInterval = setInterval(() => {
-    displayChars = displayChars.map((char, index) => 
-      revealedPositions.has(index) ? char : getRandomMatrixChar()
-    )
+    let skipNextSpin = false
+    for (let i = 0; i < displayChars.length; i++) {
+      if (!revealedPositions.has(i) && !skipNextSpin) {
+        const canUseWide = i < targetText.length - 1 && !revealedPositions.has(i + 1) && targetText[i + 1] !== ' '
+        const charResult = getRandomMatrixCharSmart(canUseWide)
+        
+        if (charResult.isWide) {
+          displayChars[i] = charResult.char
+          if (i + 1 < displayChars.length) {
+            displayChars[i + 1] = ''
+          }
+          skipNextSpin = true
+        } else {
+          displayChars[i] = charResult.char
+          skipNextSpin = false
+        }
+      } else if (skipNextSpin) {
+        skipNextSpin = false
+      }
+    }
     currentTitle.value = displayChars.join('')
   }, ANIMATION_CONFIG.matrixSpinSpeed)
   
@@ -559,11 +614,13 @@ onUnmounted(() => {
 
 .matrix-text {
   text-shadow: 0 0 10px #00ff00, 0 0 2px #00ff00, 0 0 30px #00ff00;
-  font-family: 'Saira Condensed', monospace;
+  font-family: 'Courier New', monospace;
   min-height: 1.5em;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-feature-settings: "tnum";
+  letter-spacing: 0.05em;
 }
 
 /* Matrix glitch effect */
