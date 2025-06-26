@@ -40,6 +40,18 @@ export const useContactForm = () => {
         throw new Error('No data returned from database')
       }
 
+      // Send Discord notification
+      try {
+        await $fetch('/api/contact/discord-notify', {
+          method: 'POST',
+          body: formData
+        })
+        console.log('Discord notification sent successfully')
+      } catch (discordError) {
+        console.error('Discord notification failed:', discordError)
+        // Don't fail the whole submission if Discord notification fails
+      }
+
       submitSuccess.value = true
       console.log('Contact form submitted successfully:', data[0])
 
