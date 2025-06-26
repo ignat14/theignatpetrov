@@ -181,7 +181,8 @@ const ANIMATION_CONFIG = {
   matrixSpinTime: 1000,               // Time to spin matrix chars before revealing (ms)
   charRevealInterval: 150,            // Time between each character reveal (ms)
   matrixSpinSpeed: 100,               // Speed of matrix character changes (ms)
-  betweenRevealsTime: 4000            // Time between first and second reveal
+  betweenWordsTime: 2000,             // Time between first and second word (ms)
+  secondWordSpinTime: 1000            // Time to spin second word before revealing (ms)
 }
 
 const getRandomMatrixChar = (): string => {
@@ -189,17 +190,22 @@ const getRandomMatrixChar = (): string => {
   return chars[Math.floor(Math.random() * chars.length)]
 }
 
-const startAnimation = async (): Promise<void> => {
-  const targetText = 'Software Engineer'
-  const secondTitle = 'Building cool sh#t'
-  
-  // Initialize display with matrix chars
-  let displayChars = Array.from({ length: targetText.length }, () => getRandomMatrixChar())
+const animateWordReveal = async (targetText: string): Promise<void> => {
+  // Initialize display with matrix chars, but keep spaces fixed
+  let displayChars = Array.from({ length: targetText.length }, (_, index) => 
+    targetText[index] === ' ' ? ' ' : getRandomMatrixChar()
+  )
   let revealedPositions = new Set<number>()
   
-  // Phase 1: Matrix spinning before reveal
+  // Mark space positions as already revealed
+  for (let i = 0; i < targetText.length; i++) {
+    if (targetText[i] === ' ') {
+      revealedPositions.add(i)
+    }
+  }
+  
+  // Matrix spinning phase
   const spinInterval = setInterval(() => {
-    // Update unrevealed positions with new matrix chars
     displayChars = displayChars.map((char, index) => 
       revealedPositions.has(index) ? char : getRandomMatrixChar()
     )
@@ -209,28 +215,66 @@ const startAnimation = async (): Promise<void> => {
   // Wait for spin time
   await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.matrixSpinTime))
   
-  // Phase 2: Random character reveal
+  // Random character reveal (exclude spaces)
   const positions = Array.from({ length: targetText.length }, (_, i) => i)
+    .filter(i => targetText[i] !== ' ')
   const shuffledPositions = positions.sort(() => Math.random() - 0.5)
   
   for (const position of shuffledPositions) {
-    // Reveal the real character at this position
     revealedPositions.add(position)
     displayChars[position] = targetText[position]
     currentTitle.value = displayChars.join('')
     
-    // Wait before revealing next character
     await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.charRevealInterval))
   }
   
-  // Stop matrix spinning
   clearInterval(spinInterval)
+}
+
+const transitionToMatrix = async (currentText: string, newLength: number): Promise<void> => {
+  let displayChars = currentText.split('')
+  const maxLength = Math.max(currentText.length, newLength)
   
-  // Wait between reveals
-  await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.betweenRevealsTime))
+  // Extend or trim array to match new word length
+  if (maxLength > displayChars.length) {
+    displayChars = [...displayChars, ...Array(maxLength - displayChars.length).fill('')]
+  } else if (maxLength < displayChars.length) {
+    displayChars = displayChars.slice(0, maxLength)
+  }
   
-  // Simple transition to second title
-  currentTitle.value = secondTitle
+  // Gradually convert characters to matrix chars (exclude spaces from new word)
+  const positions = Array.from({ length: currentText.length }, (_, i) => i)
+    .filter(i => currentText[i] !== ' ')
+  const shuffledPositions = positions.sort(() => Math.random() - 0.5)
+  
+  for (const position of shuffledPositions) {
+    displayChars[position] = getRandomMatrixChar()
+    currentTitle.value = displayChars.join('')
+    await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.charRevealInterval * 0.2))
+  }
+  
+  // Fill remaining positions with matrix chars
+  for (let i = currentText.length; i < maxLength; i++) {
+    displayChars[i] = getRandomMatrixChar()
+  }
+  currentTitle.value = displayChars.join('')
+}
+
+const startAnimation = async (): Promise<void> => {
+  const firstWord = 'Software Engineer'
+  const secondWord = 'Building cool sh#t'
+  
+  // Animate first word
+  await animateWordReveal(firstWord)
+  
+  // Wait between words
+  await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.betweenWordsTime))
+  
+  // Transition first word back to matrix chars
+  await transitionToMatrix(firstWord, secondWord.length)
+  
+  // Animate second word
+  await animateWordReveal(secondWord)
 }
 
 const handleParallax = () => {
