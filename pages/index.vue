@@ -182,7 +182,11 @@ const ANIMATION_CONFIG = {
   charRevealInterval: 150,            // Time between each character reveal (ms)
   matrixSpinSpeed: 100,               // Speed of matrix character changes (ms)
   betweenWordsTime: 2000,             // Time between first and second word (ms)
-  secondWordSpinTime: 1000            // Time to spin second word before revealing (ms)
+  secondWordSpinTime: 1000,           // Time to spin second word before revealing (ms)
+  finalSpinChars: '!@#$%^&{}][041',   // Characters for final spinning animation
+  finalLandingChars: '!@#*?',         // Characters to land on after spinning
+  finalSpinInterval: 3000,            // Time between each final spin cycle (ms)
+  finalSpinDuration: 1000             // Duration of each spinning animation (ms)
 }
 
 const getRandomMatrixChar = (): string => {
@@ -260,6 +264,32 @@ const transitionToMatrix = async (currentText: string, newLength: number): Promi
   currentTitle.value = displayChars.join('')
 }
 
+const startFinalSpinAnimation = (): void => {
+  const secondWord = 'Building cool sh#t'
+  const targetPosition = secondWord.length - 2 // Second to last character ('#')
+  
+  const spinChar = async () => {
+    const spinChars = ANIMATION_CONFIG.finalSpinChars
+    const landingChars = ANIMATION_CONFIG.finalLandingChars
+    const currentDisplay = currentTitle.value.split('')
+    
+    // 1 second spinning animation
+    const spinSteps = Math.floor(ANIMATION_CONFIG.finalSpinDuration / ANIMATION_CONFIG.matrixSpinSpeed)
+    for (let i = 0; i < spinSteps; i++) {
+      currentDisplay[targetPosition] = spinChars[Math.floor(Math.random() * spinChars.length)]
+      currentTitle.value = currentDisplay.join('')
+      await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.matrixSpinSpeed))
+    }
+    
+    // Land on final random character from landing set and stick for 2 seconds
+    currentDisplay[targetPosition] = landingChars[Math.floor(Math.random() * landingChars.length)]
+    currentTitle.value = currentDisplay.join('')
+  }
+  
+  // Start the recurring spin animation
+  setInterval(spinChar, ANIMATION_CONFIG.finalSpinInterval)
+}
+
 const startAnimation = async (): Promise<void> => {
   const firstWord = 'Software Engineer'
   const secondWord = 'Building cool sh#t'
@@ -275,6 +305,10 @@ const startAnimation = async (): Promise<void> => {
   
   // Animate second word
   await animateWordReveal(secondWord)
+  
+  // Wait 2 seconds after final word reveal, then start final spinning
+  await new Promise<void>(resolve => setTimeout(resolve, ANIMATION_CONFIG.finalSpinInterval))
+  startFinalSpinAnimation()
 }
 
 const handleParallax = () => {
