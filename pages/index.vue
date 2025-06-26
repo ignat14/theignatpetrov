@@ -169,75 +169,112 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import type { BlogPost } from '~/types/blog'
 
-const titles: string[] = [
-  'Software Engineer',
-  'Solopreneur', 
-  'Freelancer at Toptal',
-  'Python Lecturer'
-]
-
 const currentTitle = ref<string>('')
-const titleIndex = ref<number>(0)
 const { isLoadingAnalytics, fetchAnalytics, updateBlogPosts } = useAnalytics()
 const { getLatestPosts } = useBlogPosts()
 
 const latestPosts = ref<BlogPost[]>([])
 
-const morphTitle = async (fromTitle: string, toTitle: string): Promise<void> => {
+const revealTitle = async (title: string): Promise<void> => {
+  const chars = '0123456789@#$%^&*?><|\\;:~{}[]'
+  
+  // Create different rhythms for each character position
+  const rhythms = Array.from({ length: title.length }, (_, i) => {
+    return Math.floor(Math.random() * 4) + 2 // Random rhythm between 2-5
+  })
+  
+  // Track current characters at each position
+  let currentChars = Array.from({ length: title.length }, () => 
+    chars[Math.floor(Math.random() * chars.length)]
+  )
+  
+  // Show matrix characters then reveal from left to right
+  for (let step = 0; step <= 45; step++) {
+    let newTitle = ''
+    const progress = step / 45
+    
+    for (let i = 0; i < title.length; i++) {
+      if (progress < 0.3) {
+        // Show random matrix characters with different rhythms
+        const shouldChange = step % rhythms[i] === 0
+        if (shouldChange) {
+          currentChars[i] = chars[Math.floor(Math.random() * chars.length)]
+        }
+        newTitle += currentChars[i]
+      } else {
+        // Reveal from left to right more gradually
+        const revealProgress = (progress - 0.8) / 0.2
+        const revealPosition = revealProgress * title.length
+        
+        if (i < revealPosition - 2) {
+          newTitle += title[i]
+        } else if (i <= revealPosition + 2) {
+          newTitle += Math.random() < 0.3 ? title[i] : chars[Math.floor(Math.random() * chars.length)]
+        } else {
+          newTitle += chars[Math.floor(Math.random() * chars.length)]
+        }
+      }
+    }
+    
+    currentTitle.value = newTitle
+    await new Promise<void>(resolve => setTimeout(resolve, 80))
+  }
+  
+  currentTitle.value = title
+}
+
+const transitionTitle = async (fromTitle: string, toTitle: string): Promise<void> => {
+  const chars = '0123456789@#$%^&*?><|\\;:~{}[]'
   const maxLength = Math.max(fromTitle.length, toTitle.length)
   
-  // Matrix rain transformation effect
-  for (let step = 0; step <= 20; step++) {
+  // Transition from first to second title, left to right
+  for (let step = 0; step <= 25; step++) {
     let newTitle = ''
+    const progress = step / 25
+    const changePosition = progress * maxLength
     
     for (let i = 0; i < maxLength; i++) {
-      const progress = step / 20
-      const charProgress = Math.max(0, Math.min(1, (progress * maxLength - i) / 3))
-      
-      if (charProgress === 0) {
-        // Not started transforming yet
-        newTitle += fromTitle[i] || ' '
-      } else if (charProgress === 1) {
-        // Fully transformed
+      if (i < changePosition - 2) {
+        // Already changed - show target character
         newTitle += toTitle[i] || ' '
+      } else if (i <= changePosition + 2) {
+        // In transition zone - mix of matrix chars and target
+        if (Math.random() < 0.3) {
+          newTitle += toTitle[i] || ' '
+        } else {
+          newTitle += chars[Math.floor(Math.random() * chars.length)]
+        }
       } else {
-        // In transition - show random matrix characters
-        const chars = '0123456789@#$%^&*?><|\\;:~{}[]'
-        newTitle += chars[Math.floor(Math.random() * chars.length)]
+        // Not yet changed - show original character
+        newTitle += fromTitle[i] || ' '
       }
     }
     
     currentTitle.value = newTitle.trim()
-    await new Promise<void>(resolve => setTimeout(resolve, 80))
+    await new Promise<void>(resolve => setTimeout(resolve, 100))
   }
   
-  // Hold the final title
   currentTitle.value = toTitle
-  await new Promise<void>(resolve => setTimeout(resolve, 3000))
 }
 
 const startAnimation = async (): Promise<void> => {
-  // Start with first title
-  currentTitle.value = titles[0]
-  await new Promise<void>(resolve => setTimeout(resolve, 3000))
+  // Show first title: "Software Engineer"
+  await revealTitle('Software Engineer')
+  await new Promise<void>(resolve => setTimeout(resolve, 4000))
   
-  while (true) {
-    const currentIndex = titleIndex.value
-    const nextIndex = (currentIndex + 1) % titles.length
-    
-    await morphTitle(titles[currentIndex], titles[nextIndex])
-    titleIndex.value = nextIndex
-  }
+  // Gradually transition to second title
+  await transitionTitle('Software Engineer', 'Building cool sh#t')
+  // Stay on second title - no more switching
 }
 
 const handleParallax = () => {
-  const scrollTop = window.pageYOffset
+  const scrollTop = window.scrollY
   const parallaxElements = document.querySelectorAll('.parallax-section')
   
   parallaxElements.forEach((element) => {
     const speed = parseFloat(element.getAttribute('data-speed') || '1')
     const yPos = -(scrollTop * speed)
-    element.style.transform = `translateY(${yPos}px)`
+    ;(element as HTMLElement).style.transform = `translateY(${yPos}px)`
   })
 }
 
