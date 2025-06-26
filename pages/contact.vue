@@ -261,32 +261,33 @@ const form = ref<ContactForm>({
   message: ''
 })
 
-const isSubmitting = ref(false)
-const submitSuccess = ref(false)
-const submitError = ref('')
+const { isSubmitting, submitSuccess, submitError, submitContactForm, resetForm } = useContactForm()
 
 const handleSubmit = async () => {
-  isSubmitting.value = true
-  submitError.value = ''
-
   try {
-    // TODO: Implement form submission
-    await new Promise(resolve => setTimeout(resolve, 1000)) // Simulated API call
-    submitSuccess.value = true
-    form.value = {
-      firstName: '',
-      lastName: '',
-      email: '',
-      company: '',
-      subject: '',
-      message: ''
+    await submitContactForm(form.value)
+    
+    // Reset form on success
+    if (submitSuccess.value) {
+      form.value = {
+        firstName: '',
+        lastName: '',
+        email: '',
+        company: '',
+        subject: '',
+        message: ''
+      }
     }
   } catch (error) {
-    submitError.value = 'Failed to submit form. Please try again.'
-  } finally {
-    isSubmitting.value = false
+    // Error handling is done in the composable
+    console.error('Form submission failed:', error)
   }
 }
+
+// Reset messages when component unmounts
+onUnmounted(() => {
+  resetForm()
+})
 
 // SEO Meta
 useHead({
