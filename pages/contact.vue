@@ -174,38 +174,16 @@
                   <label for="subject" class="block text-sm font-medium text-gray-300 mb-2">
                     Subject *
                   </label>
-                  <select
+                  <input
                     v-model="form.subject"
+                    type="text"
                     id="subject"
                     required
-                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="What would you like to discuss?"
                   >
-                    <option value="">Select a subject</option>
-                    <option value="freelance">Freelance Project</option>
-                    <option value="consulting">Consulting</option>
-                    <option value="collaboration">Collaboration</option>
-                    <option value="speaking">Speaking Opportunity</option>
-                    <option value="other">Other</option>
-                  </select>
                 </div>
 
-                <div>
-                  <label for="budget" class="block text-sm font-medium text-gray-300 mb-2">
-                    Project Budget
-                  </label>
-                  <select
-                    v-model="form.budget"
-                    id="budget"
-                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select budget range</option>
-                    <option value="under-5k">Under $5,000</option>
-                    <option value="5k-10k">$5,000 - $10,000</option>
-                    <option value="10k-25k">$10,000 - $25,000</option>
-                    <option value="25k-50k">$25,000 - $50,000</option>
-                    <option value="over-50k">$50,000+</option>
-                  </select>
-                </div>
 
                 <div>
                   <label for="message" class="block text-sm font-medium text-gray-300 mb-2">
@@ -221,18 +199,6 @@
                   ></textarea>
                 </div>
 
-                <div class="flex items-start space-x-3">
-                  <input
-                    v-model="form.agreeToTerms"
-                    type="checkbox"
-                    id="agreeToTerms"
-                    required
-                    class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
-                  >
-                  <label for="agreeToTerms" class="text-sm text-gray-300">
-                    I agree to the terms and conditions and privacy policy *
-                  </label>
-                </div>
 
                 <button
                   type="submit"
@@ -291,10 +257,8 @@ const form = ref<ContactForm>({
   lastName: '',
   email: '',
   company: '',
-  subject: 'freelance',
-  budget: '',
-  message: '',
-  agreeToTerms: false
+  subject: '',
+  message: ''
 })
 
 const isSubmitting = ref(false)
@@ -302,11 +266,6 @@ const submitSuccess = ref(false)
 const submitError = ref('')
 
 const handleSubmit = async () => {
-  if (!form.value.agreeToTerms) {
-    submitError.value = 'Please agree to the terms and conditions'
-    return
-  }
-
   isSubmitting.value = true
   submitError.value = ''
 
@@ -319,10 +278,8 @@ const handleSubmit = async () => {
       lastName: '',
       email: '',
       company: '',
-      subject: 'freelance',
-      budget: '',
-      message: '',
-      agreeToTerms: false
+      subject: '',
+      message: ''
     }
   } catch (error) {
     submitError.value = 'Failed to submit form. Please try again.'
