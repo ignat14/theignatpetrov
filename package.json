@@ -8,6 +8,12 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:utils": "vitest run tests/utils/",
+    "test:api": "vitest run tests/server/",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test:e2e": "start-server-and-test dev http://localhost:3000 cypress:run"
@@ -16,9 +22,13 @@
     "@cypress/vite-dev-server": "^5.0.0",
     "@cypress/vue": "^5.0.0",
     "@nuxt/devtools": "latest",
+    "@vitest/ui": "^3.2.4",
+    "@vue/test-utils": "^2.4.6",
     "cypress": "^13.6.6",
+    "happy-dom": "^18.0.1",
     "nuxt": "^3.10.1",
-    "start-server-and-test": "^2.0.12"
+    "start-server-and-test": "^2.0.12",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@google-analytics/data": "^5.1.0",
