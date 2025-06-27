@@ -10,7 +10,7 @@ const blogPosts = ref<BlogPost[]>([
     readTime: 8,
     tags: ['Burnout', 'Comfort Zone', 'Mindfulness'],
     views: 0,
-    comments: 2
+    comments: 0
   },
   {
     slug: 'vue-3-composition-api',
@@ -20,7 +20,7 @@ const blogPosts = ref<BlogPost[]>([
     readTime: 8,
     tags: ['Vue.js', 'JavaScript', 'Frontend'],
     views: 0,
-    comments: 15
+    comments: 0
   },
 ])
 

@@ -106,3 +106,39 @@ export const useComments = (postSlug: string) => {
     formatDate
   }
 }
+
+// Standalone function to get comment counts for all posts
+export const useCommentCounts = () => {
+  const { $supabase } = useNuxtApp()
+
+  const getCommentCounts = async (postSlugs: string[]): Promise<Record<string, number>> => {
+    try {
+      const { data, error } = await $supabase
+        .from('blog_comments')
+        .select('post_slug')
+        .in('post_slug', postSlugs)
+
+      if (error) {
+        console.error('Error fetching comment counts:', error)
+        return {}
+      }
+
+      // Count comments per post slug
+      const counts: Record<string, number> = {}
+      postSlugs.forEach(slug => { counts[slug] = 0 })
+      
+      data?.forEach(comment => {
+        counts[comment.post_slug] = (counts[comment.post_slug] || 0) + 1
+      })
+
+      return counts
+    } catch (error) {
+      console.error('Comment counts fetch error:', error)
+      return {}
+    }
+  }
+
+  return {
+    getCommentCounts
+  }
+}

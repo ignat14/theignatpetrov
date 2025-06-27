@@ -131,7 +131,22 @@
                 {{ post.title }}
               </NuxtLink>
             </h3>
-            <p class="text-gray-300 text-sm">{{ post.excerpt }}</p>
+            <p class="text-gray-300 text-sm mb-4">{{ post.excerpt }}</p>
+            <div class="flex items-center space-x-4 text-xs text-gray-500">
+              <span class="flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                {{ post.views }} views
+              </span>
+              <span class="flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                {{ post.comments }} comments
+              </span>
+            </div>
           </article>
         </div>
       </div>
@@ -154,36 +169,38 @@ const { data } = await useAsyncData<BlogContent>(`content-${route.params.slug}`,
   return content as unknown as BlogContent
 })
 
-// Fetch analytics data for this specific post
-onMounted(async () => {
-  await fetchAnalytics()
+// Get related posts from the blog posts composable
+const { blogPosts } = useBlogPosts()
+const { getCommentCounts } = useCommentCounts()
+
+const relatedPosts = computed(() => {
   const currentSlug = route.params.slug as string
-  viewCount.value = getViewCount(currentSlug)
+  return blogPosts.value
+    .filter(post => post.slug !== currentSlug)
+    .slice(0, 2) // Show 2 related posts
 })
 
-// Sample related posts (in a real app, this would be fetched based on tags or categories)
-const relatedPosts: BlogPost[] = [
-  {
-    slug: 'fastapi-scalable-apis',
-    title: 'Building Scalable APIs with FastAPI',
-    excerpt: 'Tips and best practices for creating high-performance REST APIs using Python\'s FastAPI framework.',
-    date: '2024-03-10',
-    readTime: 12,
-    tags: ['Python', 'FastAPI', 'Backend'],
-    views: 892,
-    comments: 8
-  },
-  {
-    slug: 'typescript-advanced-patterns',
-    title: 'Advanced TypeScript Patterns for Better Code',
-    excerpt: 'Explore advanced TypeScript patterns and techniques that will help you write more robust code.',
-    date: '2024-02-28',
-    readTime: 15,
-    tags: ['TypeScript', 'JavaScript', 'Development'],
-    views: 1456,
-    comments: 23
+// Fetch analytics data and comment counts
+onMounted(async () => {
+  const currentSlug = route.params.slug as string
+  
+  // Fetch analytics data for this specific post
+  await fetchAnalytics()
+  viewCount.value = getViewCount(currentSlug)
+  
+  // Fetch comment counts for all posts including related ones
+  try {
+    const allSlugs = blogPosts.value.map(post => post.slug)
+    const commentCounts = await getCommentCounts(allSlugs)
+    
+    // Update blog posts with real comment counts
+    blogPosts.value.forEach(post => {
+      post.comments = commentCounts[post.slug] || 0
+    })
+  } catch (error) {
+    console.error('Failed to fetch comment counts:', error)
   }
-]
+})
 
 const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return ''

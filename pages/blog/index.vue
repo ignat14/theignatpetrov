@@ -104,7 +104,8 @@
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                     </svg>
-                    {{ post.comments }} comments
+                    <span v-if="isLoadingComments || isLoadingAnalytics" class="inline-block w-12 h-4 bg-gray-600 rounded animate-pulse"></span>
+                    <span v-else>{{ post.comments }} comments</span>
                   </span>
                 </div>
               </div>
@@ -141,11 +142,31 @@ const displayedPostsCount = ref<number>(6)
 
 const { isLoadingAnalytics, fetchAnalytics, updateBlogPosts } = useAnalytics()
 const { blogPosts } = useBlogPosts()
+const { getCommentCounts } = useCommentCounts()
 
-// Fetch analytics data and merge with blog posts
+const isLoadingComments = ref(false)
+
+// Fetch analytics data and comment counts, then merge with blog posts
 onMounted(async () => {
+  // Fetch analytics data
   await fetchAnalytics()
   updateBlogPosts(blogPosts.value)
+  
+  // Fetch comment counts
+  isLoadingComments.value = true
+  try {
+    const postSlugs = blogPosts.value.map(post => post.slug)
+    const commentCounts = await getCommentCounts(postSlugs)
+    
+    // Update blog posts with real comment counts
+    blogPosts.value.forEach(post => {
+      post.comments = commentCounts[post.slug] || 0
+    })
+  } catch (error) {
+    console.error('Failed to fetch comment counts:', error)
+  } finally {
+    isLoadingComments.value = false
+  }
 })
 
 const allTags = computed<string[]>(() => {
