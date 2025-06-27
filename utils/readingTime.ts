@@ -47,3 +47,60 @@ export async function getReadTimeForPost(slug: string): Promise<number> {
     return MINIMUM_READ_TIME
   }
 }
+
+/**
+ * Get reading times for multiple blog posts in a single batch request
+ */
+export async function getReadTimesForPosts(slugs: string[]): Promise<Record<string, number>> {
+  if (!slugs || slugs.length === 0) {
+    return {}
+  }
+
+  try {
+    const response = await $fetch('/api/blog/read-content-batch', {
+      method: 'POST',
+      body: { slugs }
+    })
+    
+    // Log any errors for debugging, but don't fail the entire operation
+    if (response.errors && Object.keys(response.errors).length > 0) {
+      console.warn('Some reading times could not be calculated:', response.errors)
+    }
+    
+    return response.readTimes || {}
+  } catch (error) {
+    console.warn('Batch reading time calculation failed:', error)
+    
+    // Fallback: return minimum read time for all slugs
+    const fallback: Record<string, number> = {}
+    slugs.forEach(slug => {
+      fallback[slug] = MINIMUM_READ_TIME
+    })
+    return fallback
+  }
+}
+
+/**
+ * Cache for reading times to avoid repeated calculations
+ */
+const readTimeCache = new Map<string, number>()
+
+/**
+ * Get reading time with caching support
+ */
+export async function getCachedReadTimeForPost(slug: string): Promise<number> {
+  if (readTimeCache.has(slug)) {
+    return readTimeCache.get(slug)!
+  }
+  
+  const readTime = await getReadTimeForPost(slug)
+  readTimeCache.set(slug, readTime)
+  return readTime
+}
+
+/**
+ * Clear the reading time cache
+ */
+export function clearReadTimeCache(): void {
+  readTimeCache.clear()
+}

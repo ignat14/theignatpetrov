@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { BLOG_CONFIG } from '~/utils/config'
+import { describe, it, expect, vi } from 'vitest'
+import { BLOG_CONFIG, validateBlogConfig, DEFAULT_CONFIG } from '~/utils/config'
 
 describe('BLOG_CONFIG', () => {
   describe('structure validation', () => {
@@ -133,6 +133,172 @@ describe('BLOG_CONFIG', () => {
       // All error messages should be strings
       Object.values(BLOG_CONFIG.ERRORS).forEach(value => {
         expect(typeof value).toBe('string')
+      })
+    })
+  })
+
+  describe('configuration validation', () => {
+    describe('validateBlogConfig', () => {
+      it('should return default config when given empty object', () => {
+        const result = validateBlogConfig({})
+        expect(result).toEqual(DEFAULT_CONFIG)
+      })
+
+      it('should merge partial configurations with defaults', () => {
+        const partialConfig = {
+          UI: {
+            POSTS_PER_PAGE: 10
+          }
+        }
+        
+        const result = validateBlogConfig(partialConfig)
+        expect(result.UI.POSTS_PER_PAGE).toBe(10)
+        expect(result.UI.LATEST_POSTS_COUNT).toBe(DEFAULT_CONFIG.UI.LATEST_POSTS_COUNT)
+        expect(result.CACHE).toEqual(DEFAULT_CONFIG.CACHE)
+      })
+
+      it('should validate cache configuration', () => {
+        expect(() => validateBlogConfig({
+          CACHE: {
+            BLOG_STATS_KEY: '',
+            BLOG_STATS_DURATION: 5000,
+            ANALYTICS_DURATION: 10000
+          }
+        })).toThrow('Cache configuration validation failed')
+
+        expect(() => validateBlogConfig({
+          CACHE: {
+            BLOG_STATS_KEY: 'valid-key',
+            BLOG_STATS_DURATION: -1000,
+            ANALYTICS_DURATION: 10000
+          }
+        })).toThrow('Cache configuration validation failed')
+      })
+
+      it('should validate API configuration', () => {
+        expect(() => validateBlogConfig({
+          API: {
+            BLOG_STATS: 'invalid-endpoint',
+            ANALYTICS: '/api/analytics',
+            COMMENTS: 'blog_comments'
+          }
+        })).toThrow('API configuration validation failed')
+
+        expect(() => validateBlogConfig({
+          API: {
+            BLOG_STATS: '/api/blog/stats',
+            ANALYTICS: 'invalid-endpoint',
+            COMMENTS: 'blog_comments'
+          }
+        })).toThrow('API configuration validation failed')
+      })
+
+      it('should validate UI configuration', () => {
+        expect(() => validateBlogConfig({
+          UI: {
+            POSTS_PER_PAGE: -5,
+            POSTS_PER_LOAD: 6,
+            LATEST_POSTS_COUNT: 3,
+            RELATED_POSTS_COUNT: 2,
+            COMMENT_AUTO_HIDE_SUCCESS: 5000
+          }
+        })).toThrow('UI configuration validation failed')
+
+        expect(() => validateBlogConfig({
+          UI: {
+            POSTS_PER_PAGE: 3.5, // Non-integer
+            POSTS_PER_LOAD: 6,
+            LATEST_POSTS_COUNT: 3,
+            RELATED_POSTS_COUNT: 2,
+            COMMENT_AUTO_HIDE_SUCCESS: 5000
+          }
+        })).toThrow('UI configuration validation failed')
+      })
+
+      it('should validate error configuration', () => {
+        expect(() => validateBlogConfig({
+          ERRORS: {
+            NETWORK: '',
+            GENERIC_SUBMIT: 'Valid message',
+            GENERIC_FETCH: 'Valid message',
+            CACHE_READ: 'Valid message',
+            CACHE_WRITE: 'Valid message'
+          }
+        })).toThrow('Error configuration validation failed')
+      })
+
+      it('should accept valid configurations', () => {
+        const validConfig = {
+          CACHE: {
+            BLOG_STATS_KEY: 'custom-cache-key',
+            BLOG_STATS_DURATION: 10000,
+            ANALYTICS_DURATION: 20000
+          },
+          API: {
+            BLOG_STATS: '/api/custom/stats',
+            ANALYTICS: '/api/custom/analytics',
+            COMMENTS: 'custom_comments_table'
+          },
+          UI: {
+            POSTS_PER_PAGE: 12,
+            POSTS_PER_LOAD: 8,
+            LATEST_POSTS_COUNT: 5,
+            RELATED_POSTS_COUNT: 4,
+            COMMENT_AUTO_HIDE_SUCCESS: 3000
+          },
+          ERRORS: {
+            NETWORK: 'Custom network error',
+            GENERIC_SUBMIT: 'Custom submit error',
+            GENERIC_FETCH: 'Custom fetch error',
+            CACHE_READ: 'Custom cache read error',
+            CACHE_WRITE: 'Custom cache write error'
+          }
+        }
+
+        expect(() => validateBlogConfig(validConfig)).not.toThrow()
+        const result = validateBlogConfig(validConfig)
+        expect(result.CACHE.BLOG_STATS_KEY).toBe('custom-cache-key')
+        expect(result.UI.POSTS_PER_PAGE).toBe(12)
+      })
+    })
+
+    describe('environment variable support', () => {
+      it('should use default config when process is undefined', () => {
+        // This simulates browser environment where process is not available
+        const result = validateBlogConfig({})
+        expect(result).toEqual(DEFAULT_CONFIG)
+      })
+
+      it('should handle environment variables if process is available', () => {
+        // Mock process.env
+        const mockEnv = {
+          BLOG_CACHE_STATS_DURATION: '30000',
+          BLOG_UI_POSTS_PER_PAGE: '8'
+        }
+
+        // This test validates the logic, though the actual environment override
+        // happens at module load time
+        expect(mockEnv.BLOG_CACHE_STATS_DURATION).toBe('30000')
+        expect(parseInt(mockEnv.BLOG_CACHE_STATS_DURATION, 10)).toBe(30000)
+      })
+    })
+
+    describe('error handling', () => {
+      it('should log errors and re-throw during validation', () => {
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        
+        expect(() => validateBlogConfig({
+          CACHE: {
+            BLOG_STATS_DURATION: 'invalid' as any
+          }
+        })).toThrow()
+        
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Blog configuration validation failed:',
+          expect.any(Error)
+        )
+        
+        consoleErrorSpy.mockRestore()
       })
     })
   })

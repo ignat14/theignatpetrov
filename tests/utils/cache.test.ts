@@ -193,6 +193,70 @@ describe('CacheManager', () => {
     })
   })
 
-  // Note: getOrSet method doesn't exist in current implementation
-  // This would be a useful addition for the cache manager
+  describe('getOrSet', () => {
+    it('should return cached data when valid', async () => {
+      const mockGetItem = vi.mocked(localStorage.getItem)
+      const validData = {
+        data: testData,
+        timestamp: Date.now()
+      }
+      mockGetItem.mockReturnValue(JSON.stringify(validData))
+      
+      const fetchFn = vi.fn()
+      const result = await cacheManager.getOrSet(fetchFn)
+      
+      expect(result).toEqual(testData)
+      expect(fetchFn).not.toHaveBeenCalled()
+    })
+
+    it('should fetch and cache new data when cache is invalid', async () => {
+      const mockGetItem = vi.mocked(localStorage.getItem)
+      const mockSetItem = vi.mocked(localStorage.setItem)
+      mockGetItem.mockReturnValue(null)
+      
+      const newData = { id: 2, name: 'New Data' }
+      const fetchFn = vi.fn().mockResolvedValue(newData)
+      
+      const result = await cacheManager.getOrSet(fetchFn)
+      
+      expect(result).toEqual(newData)
+      expect(fetchFn).toHaveBeenCalledOnce()
+      expect(mockSetItem).toHaveBeenCalledWith(
+        testKey,
+        expect.stringContaining(JSON.stringify(newData))
+      )
+    })
+
+    it('should handle fetch function errors gracefully', async () => {
+      const mockGetItem = vi.mocked(localStorage.getItem)
+      mockGetItem.mockReturnValue(null)
+      
+      const fetchFn = vi.fn().mockRejectedValue(new Error('Fetch failed'))
+      
+      await expect(cacheManager.getOrSet(fetchFn)).rejects.toThrow('Fetch failed')
+    })
+  })
+
+  describe('warm', () => {
+    it('should pre-populate cache with fetched data', async () => {
+      const mockSetItem = vi.mocked(localStorage.setItem)
+      const newData = { id: 3, name: 'Warmed Data' }
+      const fetchFn = vi.fn().mockResolvedValue(newData)
+      
+      await cacheManager.warm(fetchFn)
+      
+      expect(fetchFn).toHaveBeenCalledOnce()
+      expect(mockSetItem).toHaveBeenCalledWith(
+        testKey,
+        expect.stringContaining(JSON.stringify(newData))
+      )
+    })
+
+    it('should not throw on warming failures', async () => {
+      const fetchFn = vi.fn().mockRejectedValue(new Error('Warm failed'))
+      
+      await expect(cacheManager.warm(fetchFn)).resolves.toBeUndefined()
+      expect(fetchFn).toHaveBeenCalledOnce()
+    })
+  })
 })

@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import type { BlogPost } from '~/types/blog'
-import { getReadTimeForPost } from '~/utils/readingTime'
+import { getReadTimesForPosts, getReadTimeForPost } from '~/utils/readingTime'
 
 const blogPosts = ref<BlogPost[]>([])
 const isInitialized = ref(false)
@@ -13,22 +13,27 @@ export const useBlogPosts = () => {
       // Get all blog posts from content directory  
       const posts = await queryContent('/blog').find()
       
-      // Calculate reading time for each post
-      blogPosts.value = await Promise.all(posts.map(async post => {
+      // Extract all slugs for batch processing
+      const slugs = posts.map(post => post.slug || post._path?.replace('/blog/', '') || '')
+      
+      // Get reading times in a single batch request
+      const readTimes = await getReadTimesForPosts(slugs)
+      
+      // Map posts with their reading times
+      blogPosts.value = posts.map(post => {
         const slug = post.slug || post._path?.replace('/blog/', '') || ''
-        const readTime = await getReadTimeForPost(slug)
         
         return {
           slug,
           title: post.title || 'Untitled',
           excerpt: post.description || '',
           date: post.date || '',
-          readTime,
+          readTime: readTimes[slug] || 1, // Fallback to 1 minute
           tags: post.tags || [],
           views: 0,
           comments: 0
         }
-      }))
+      })
       
       isInitialized.value = true
     } catch (error) {

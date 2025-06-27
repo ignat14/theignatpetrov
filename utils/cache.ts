@@ -76,6 +76,38 @@ export class CacheManager<T> {
   isValid(): boolean {
     return this.get() !== null
   }
+
+  /**
+   * Get data from cache, or fetch and cache if not available
+   */
+  async getOrSet<R = T>(fetchFn: () => Promise<R>): Promise<R> {
+    const cached = this.get()
+    if (cached !== null) {
+      return cached as unknown as R
+    }
+
+    try {
+      const fresh = await fetchFn()
+      this.set(fresh as unknown as T)
+      return fresh
+    } catch (error) {
+      console.warn(`Failed to fetch data for cache key "${this.key}":`, error)
+      throw error
+    }
+  }
+
+  /**
+   * Warm the cache by pre-fetching data
+   */
+  async warm<R = T>(fetchFn: () => Promise<R>): Promise<void> {
+    try {
+      const data = await fetchFn()
+      this.set(data as unknown as T)
+    } catch (error) {
+      console.warn(`Failed to warm cache for key "${this.key}":`, error)
+      // Don't throw - cache warming is optional
+    }
+  }
 }
 
 // Pre-configured cache managers for common use cases
