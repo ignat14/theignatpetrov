@@ -141,11 +141,13 @@ const searchQuery = ref<string>('')
 const selectedTags = ref<string[]>([])
 const displayedPostsCount = ref<number>(BLOG_CONFIG.UI.POSTS_PER_PAGE)
 
-const { blogPosts } = useBlogPosts()
+const { getAllPosts } = useBlogPosts()
+const blogPosts = ref<BlogPost[]>([])
 const { isLoading: isLoadingStats, fetchBlogStats, updateBlogPosts } = useBlogStats()
 
-// Fetch blog stats (analytics + comment counts) in single API call
+// Load blog posts and stats
 onMounted(async () => {
+  blogPosts.value = await getAllPosts()
   await fetchBlogStats()
   updateBlogPosts(blogPosts.value)
 })

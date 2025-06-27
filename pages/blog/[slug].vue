@@ -158,16 +158,24 @@
 import { ref, onMounted } from 'vue'
 import type { BlogContent, BlogPost } from '~/types/blog'
 import { BLOG_CONFIG } from '~/utils/config'
+import { getReadTimeForPost } from '~/utils/readingTime'
 
 const route = useRoute()
 const viewCount = ref<number>(0)
 
 const { isLoading: isLoadingStats, fetchBlogStats, getViewCount, updateBlogPosts } = useBlogStats()
 
-// Fetch the blog post content
+// Fetch the blog post content with calculated reading time
 const { data } = await useAsyncData<BlogContent>(`content-${route.params.slug}`, async () => {
-  const content = await queryContent('/blog').where({ _path: `/blog/${route.params.slug}` }).findOne()
-  return content as unknown as BlogContent
+  const [content, readTime] = await Promise.all([
+    queryContent('/blog').where({ _path: `/blog/${route.params.slug}` }).findOne(),
+    getReadTimeForPost(route.params.slug as string)
+  ])
+  
+  return {
+    ...content,
+    readTime
+  } as unknown as BlogContent
 })
 
 // Get related posts from the blog posts composable

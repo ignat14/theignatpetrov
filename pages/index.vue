@@ -567,8 +567,8 @@ const handleParallax = () => {
   })
 }
 
-const loadLatestPosts = () => {
-  latestPosts.value = getLatestPosts(BLOG_CONFIG.UI.LATEST_POSTS_COUNT)
+const loadLatestPosts = async () => {
+  latestPosts.value = await getLatestPosts(BLOG_CONFIG.UI.LATEST_POSTS_COUNT)
 }
 
 const formatDate = (dateString: string): string => {
@@ -587,7 +587,7 @@ onMounted(async () => {
   window.addEventListener('scroll', handleParallax)
   
   // Load latest posts and blog stats
-  loadLatestPosts()
+  await loadLatestPosts()
   await fetchBlogStats()
   updateBlogPosts(latestPosts.value)
 })
