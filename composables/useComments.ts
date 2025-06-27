@@ -1,44 +1,58 @@
-import type { BlogComment, CommentForm, CommentSubmission } from '~/types/comment'
+import type { BlogComment, CommentForm, CommentState } from '~/types/comment'
 import type { Database } from '~/types/database'
+import { BLOG_CONFIG } from '~/utils/config'
+import { clearAllBlogCaches } from '~/utils/cache'
 
 type BlogCommentInsert = Database['public']['Tables']['blog_comments']['Insert']
 
 export const useComments = (postSlug: string) => {
   const { $supabase } = useNuxtApp()
-  const comments = ref<BlogComment[]>([])
-  const isLoading = ref(false)
-  const isSubmitting = ref(false)
-  const submitError = ref('')
-  const submitSuccess = ref(false)
+  
+  // State management with better typing
+  const state = reactive<CommentState>({
+    comments: [],
+    isLoading: false,
+    isSubmitting: false,
+    submitError: '',
+    submitSuccess: false
+  })
 
   const fetchComments = async (): Promise<void> => {
-    isLoading.value = true
+    state.isLoading = true
+    state.submitError = ''
+    
     try {
       const { data, error } = await $supabase
-        .from('blog_comments')
+        .from(BLOG_CONFIG.API.COMMENTS)
         .select('*')
         .eq('post_slug', postSlug)
         .order('created_at', { ascending: false })
 
       if (error) {
         console.error('Error fetching comments:', error)
-        throw new Error(error.message || 'Failed to fetch comments')
+        throw new Error(error.message || BLOG_CONFIG.ERRORS.GENERIC_FETCH)
       }
 
-      comments.value = data || []
+      state.comments = data || []
     } catch (error: any) {
       console.error('Comments fetch error:', error)
+      state.submitError = error.message || BLOG_CONFIG.ERRORS.GENERIC_FETCH
     } finally {
-      isLoading.value = false
+      state.isLoading = false
     }
   }
 
   const submitComment = async (formData: CommentForm): Promise<void> => {
-    isSubmitting.value = true
-    submitError.value = ''
-    submitSuccess.value = false
+    state.isSubmitting = true
+    state.submitError = ''
+    state.submitSuccess = false
 
     try {
+      // Validate form data
+      if (!formData.username.trim() || !formData.comment.trim()) {
+        throw new Error('Username and comment are required')
+      }
+
       const commentData: BlogCommentInsert = {
         post_slug: postSlug,
         username: formData.username.trim(),
@@ -46,32 +60,26 @@ export const useComments = (postSlug: string) => {
       }
 
       const { data, error } = await $supabase
-        .from('blog_comments')
+        .from(BLOG_CONFIG.API.COMMENTS)
         .insert(commentData)
         .select()
 
       if (error) {
         console.error('Supabase error:', error)
-        throw new Error(error.message || 'Failed to submit comment')
+        throw new Error(error.message || BLOG_CONFIG.ERRORS.GENERIC_SUBMIT)
       }
 
       if (!data || data.length === 0) {
         throw new Error('No data returned from database')
       }
 
-      submitSuccess.value = true
+      state.submitSuccess = true
       
       // Add the new comment to the list
-      comments.value.unshift(data[0] as BlogComment)
+      state.comments.unshift(data[0] as BlogComment)
       
       // Clear blog stats cache so comment counts refresh
-      if (process.client) {
-        try {
-          localStorage.removeItem('blog-stats-cache')
-        } catch (error) {
-          console.warn('Failed to clear stats cache:', error)
-        }
-      }
+      clearAllBlogCaches()
       
       console.log('Comment submitted successfully:', data[0])
 
@@ -79,18 +87,18 @@ export const useComments = (postSlug: string) => {
       console.error('Comment submission error:', error)
       
       if (error.message?.includes('network')) {
-        submitError.value = 'Network error. Please check your connection and try again.'
+        state.submitError = BLOG_CONFIG.ERRORS.NETWORK
       } else {
-        submitError.value = error.message || 'Failed to submit comment. Please try again.'
+        state.submitError = error.message || BLOG_CONFIG.ERRORS.GENERIC_SUBMIT
       }
     } finally {
-      isSubmitting.value = false
+      state.isSubmitting = false
     }
   }
 
   const resetForm = () => {
-    submitSuccess.value = false
-    submitError.value = ''
+    state.submitSuccess = false
+    state.submitError = ''
   }
 
   const formatDate = (dateString: string): string => {
@@ -103,56 +111,27 @@ export const useComments = (postSlug: string) => {
     })
   }
 
+  // Auto-hide success message after a delay
+  watch(() => state.submitSuccess, (newValue) => {
+    if (newValue) {
+      setTimeout(() => {
+        resetForm()
+      }, BLOG_CONFIG.UI.COMMENT_AUTO_HIDE_SUCCESS)
+    }
+  })
+
   return {
-    comments: readonly(comments),
-    isLoading: readonly(isLoading),
-    isSubmitting: readonly(isSubmitting),
-    submitError: readonly(submitError),
-    submitSuccess: readonly(submitSuccess),
+    // Expose readonly state
+    comments: readonly(toRef(state, 'comments')),
+    isLoading: readonly(toRef(state, 'isLoading')),
+    isSubmitting: readonly(toRef(state, 'isSubmitting')),
+    submitError: readonly(toRef(state, 'submitError')),
+    submitSuccess: readonly(toRef(state, 'submitSuccess')),
+    
+    // Actions
     fetchComments,
     submitComment,
     resetForm,
     formatDate
-  }
-}
-
-// Standalone function to get comment counts for all posts
-export const useCommentCounts = () => {
-  const { $supabase } = useNuxtApp()
-
-  const getCommentCounts = async (postSlugs: string[]): Promise<Record<string, number>> => {
-    try {
-      // Use Promise.all to fetch counts for all posts in parallel
-      const countPromises = postSlugs.map(async (slug) => {
-        const { count, error } = await $supabase
-          .from('blog_comments')
-          .select('*', { count: 'exact', head: true })
-          .eq('post_slug', slug)
-
-        if (error) {
-          console.error(`Error fetching count for ${slug}:`, error)
-          return { slug, count: 0 }
-        }
-
-        return { slug, count: count || 0 }
-      })
-
-      const results = await Promise.all(countPromises)
-      
-      // Convert to object format
-      const counts: Record<string, number> = {}
-      results.forEach(result => {
-        counts[result.slug] = result.count
-      })
-
-      return counts
-    } catch (error) {
-      console.error('Comment counts fetch error:', error)
-      return {}
-    }
-  }
-
-  return {
-    getCommentCounts
   }
 }

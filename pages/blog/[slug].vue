@@ -157,6 +157,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import type { BlogContent, BlogPost } from '~/types/blog'
+import { BLOG_CONFIG } from '~/utils/config'
 
 const route = useRoute()
 const viewCount = ref<number>(0)
@@ -176,7 +177,7 @@ const relatedPosts = computed(() => {
   const currentSlug = route.params.slug as string
   return blogPosts.value
     .filter(post => post.slug !== currentSlug)
-    .slice(0, 2) // Show 2 related posts
+    .slice(0, BLOG_CONFIG.UI.RELATED_POSTS_COUNT)
 })
 
 // Fetch blog stats (analytics + comment counts) in single API call

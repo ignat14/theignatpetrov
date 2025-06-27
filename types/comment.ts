@@ -17,3 +17,24 @@ export interface CommentSubmission {
   username: string
   comment: string
 }
+
+// Validation types
+export interface CommentFormValidation {
+  username: string[]
+  comment: string[]
+}
+
+// State management types
+export interface CommentState {
+  comments: BlogComment[]
+  isLoading: boolean
+  isSubmitting: boolean
+  submitError: string
+  submitSuccess: boolean
+}
+
+// API response types
+export interface CommentSubmissionResponse {
+  data: BlogComment | null
+  error: string | null
+}

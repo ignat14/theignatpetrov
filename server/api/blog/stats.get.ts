@@ -1,8 +1,21 @@
 import { createClient } from '@supabase/supabase-js'
+import type { BlogStatsResponse, AnalyticsData } from '~/types/analytics'
 
-export default defineEventHandler(async (event) => {
+interface CommentRow {
+  post_slug: string
+}
+
+export default defineEventHandler(async (event): Promise<BlogStatsResponse> => {
+  const config = useRuntimeConfig()
+  
   try {
-    const config = useRuntimeConfig()
+    // Validate environment configuration
+    if (!config.public.supabaseUrl || !config.public.supabaseAnonKey) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'Missing Supabase configuration'
+      })
+    }
     
     // Initialize Supabase client
     const supabase = createClient(
@@ -10,44 +23,74 @@ export default defineEventHandler(async (event) => {
       config.public.supabaseAnonKey
     )
 
-    // Fetch analytics data
-    const analyticsPromise = $fetch('/api/analytics/pageviews')
-
-    // Fetch comment counts for all posts
-    const commentCountsPromise = supabase
-      .from('blog_comments')
-      .select('post_slug')
-
-    // Execute both queries in parallel
-    const [analyticsData, { data: commentsData, error: commentsError }] = await Promise.all([
-      analyticsPromise,
-      commentCountsPromise
+    // Execute both queries in parallel with proper error handling
+    const [analyticsResult, commentsResult] = await Promise.allSettled([
+      $fetch<AnalyticsData>('/api/analytics/pageviews').catch((error) => {
+        console.warn('Analytics fetch failed, using fallback:', error.message)
+        return []
+      }),
+      supabase
+        .from('blog_comments')
+        .select('post_slug')
+        .then(result => result)
     ])
 
-    if (commentsError) {
-      console.error('Error fetching comments:', commentsError)
+    // Process analytics data
+    let analyticsData: AnalyticsData = []
+    if (analyticsResult.status === 'fulfilled') {
+      analyticsData = Array.isArray(analyticsResult.value) ? analyticsResult.value : []
+    } else {
+      console.error('Analytics fetch failed:', analyticsResult.reason)
     }
 
     // Process comment counts
-    const commentCounts: Record<string, number> = {}
-    if (commentsData) {
-      commentsData.forEach((comment: { post_slug: string }) => {
-        commentCounts[comment.post_slug] = (commentCounts[comment.post_slug] || 0) + 1
+    let commentCounts: Record<string, number> = {}
+    if (commentsResult.status === 'fulfilled') {
+      const { data: commentsData, error: commentsError } = commentsResult.value
+      
+      if (commentsError) {
+        console.error('Error fetching comments:', commentsError)
+        throw createError({
+          statusCode: 500,
+          statusMessage: `Database error: ${commentsError.message}`
+        })
+      }
+
+      if (commentsData && Array.isArray(commentsData)) {
+        commentsData.forEach((comment: CommentRow) => {
+          if (comment.post_slug) {
+            commentCounts[comment.post_slug] = (commentCounts[comment.post_slug] || 0) + 1
+          }
+        })
+      }
+    } else {
+      console.error('Comments fetch failed:', commentsResult.reason)
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'Failed to fetch comment data'
       })
     }
 
-    // Return combined data
-    return {
-      analytics: Array.isArray(analyticsData) ? analyticsData : [],
+    // Return properly typed response
+    const response: BlogStatsResponse = {
+      analytics: analyticsData,
       commentCounts
     }
-  } catch (error) {
+
+    return response
+
+  } catch (error: any) {
     console.error('Error fetching blog stats:', error)
     
-    // Return empty data on error
-    return {
-      analytics: [],
-      commentCounts: {}
+    // If it's already a Nuxt error, re-throw it
+    if (error.statusCode) {
+      throw error
     }
+    
+    // Create a generic error response
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Internal server error while fetching blog statistics'
+    })
   }
 })

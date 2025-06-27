@@ -135,10 +135,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import type { BlogPost } from '~/types/blog'
+import { BLOG_CONFIG } from '~/utils/config'
 
 const searchQuery = ref<string>('')
 const selectedTags = ref<string[]>([])
-const displayedPostsCount = ref<number>(6)
+const displayedPostsCount = ref<number>(BLOG_CONFIG.UI.POSTS_PER_PAGE)
 
 const { blogPosts } = useBlogPosts()
 const { isLoading: isLoadingStats, fetchBlogStats, updateBlogPosts } = useBlogStats()
@@ -194,7 +195,7 @@ const toggleTag = (tag: string): void => {
 }
 
 const loadMorePosts = (): void => {
-  displayedPostsCount.value += 6
+  displayedPostsCount.value += BLOG_CONFIG.UI.POSTS_PER_LOAD
 }
 
 const formatDate = (date: string): string => {

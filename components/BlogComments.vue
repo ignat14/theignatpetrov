@@ -12,14 +12,24 @@
       <h3 class="text-lg font-semibold text-white mb-4">Leave a Comment</h3>
       
       <!-- Success Message -->
-      <div v-if="submitSuccess" class="mb-4 p-4 bg-green-900 border border-green-700 rounded-lg">
-        <p class="text-green-300">Comment submitted successfully! Thank you for your feedback.</p>
-      </div>
+      <SuccessMessage
+        v-if="submitSuccess"
+        message="Comment submitted successfully! Thank you for your feedback."
+        class="mb-4"
+        :dismissible="true"
+        @dismiss="resetForm"
+      />
 
       <!-- Error Message -->
-      <div v-if="submitError" class="mb-4 p-4 bg-red-900 border border-red-700 rounded-lg">
-        <p class="text-red-300">{{ submitError }}</p>
-      </div>
+      <ErrorMessage
+        v-if="submitError"
+        :message="submitError"
+        class="mb-4"
+        :show-retry="true"
+        :dismissible="true"
+        @retry="handleSubmit"
+        @dismiss="resetForm"
+      />
 
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
@@ -66,9 +76,19 @@
     <!-- Comments List -->
     <div class="space-y-6">
       <!-- Loading State -->
-      <div v-if="isLoading" class="text-center py-8">
-        <div class="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-gray-400 mt-2">Loading comments...</p>
+      <div v-if="isLoading" class="space-y-4">
+        <div v-for="i in 3" :key="i" class="bg-gray-900 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-start space-x-4">
+            <LoadingSkeleton variant="avatar" />
+            <div class="flex-1 space-y-2">
+              <div class="flex items-center space-x-2">
+                <LoadingSkeleton width="100px" height="16px" />
+                <LoadingSkeleton width="80px" height="14px" />
+              </div>
+              <LoadingSkeleton width="100%" height="60px" />
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- No Comments -->

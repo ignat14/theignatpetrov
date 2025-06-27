@@ -173,6 +173,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import type { BlogPost } from '~/types/blog'
+import { BLOG_CONFIG } from '~/utils/config'
 
 const currentTitle = ref<string>('')
 const matrixContainer = ref<HTMLElement>()
@@ -567,7 +568,7 @@ const handleParallax = () => {
 }
 
 const loadLatestPosts = () => {
-  latestPosts.value = getLatestPosts(3)
+  latestPosts.value = getLatestPosts(BLOG_CONFIG.UI.LATEST_POSTS_COUNT)
 }
 
 const formatDate = (dateString: string): string => {
