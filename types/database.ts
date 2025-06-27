@@ -36,6 +36,32 @@ export interface Database {
           updated_at?: string
         }
       }
+      blog_comments: {
+        Row: {
+          id: string
+          post_slug: string
+          username: string
+          comment: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          post_slug: string
+          username: string
+          comment: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          post_slug?: string
+          username?: string
+          comment?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }

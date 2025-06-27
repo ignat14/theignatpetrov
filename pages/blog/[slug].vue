@@ -1,7 +1,8 @@
 <template>
-  <div class="min-h-screen bg-gray-900">
+  <div class="min-h-screen bg-gray-950">
     <!-- Article Header -->
-    <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <article class="bg-gray-900 border-b border-gray-800">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Back Navigation -->
       <div class="mb-8">
         <NuxtLink 
@@ -99,17 +100,26 @@
           </div>
         </div>
       </footer>
+
+      </div>
     </article>
 
-    <!-- Related Posts -->
+    <!-- Comments Section -->
     <section class="bg-gray-800 py-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <BlogComments :post-slug="route.params.slug as string" />
+      </div>
+    </section>
+
+    <!-- Related Posts -->
+    <section class="bg-gray-900 py-16">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-2xl font-bold text-white mb-8">Related Posts</h2>
         <div class="grid md:grid-cols-2 gap-6">
           <article 
             v-for="post in relatedPosts" 
             :key="post.slug"
-            class="bg-gray-900 rounded-lg p-6 border border-gray-700 hover:border-blue-500 transition-colors"
+            class="bg-gray-950 rounded-lg p-6 border border-gray-700 hover:border-blue-500 transition-colors"
           >
             <div class="flex items-center space-x-3 text-sm text-gray-400 mb-3">
               <time>{{ formatDate(post.date) }}</time>
