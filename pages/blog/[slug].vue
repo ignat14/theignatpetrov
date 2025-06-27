@@ -28,7 +28,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
             </svg>
-            <span v-if="isLoadingAnalytics" class="inline-block w-8 h-4 bg-gray-600 rounded animate-pulse"></span>
+            <span v-if="isLoadingStats" class="inline-block w-8 h-4 bg-gray-600 rounded animate-pulse"></span>
             <span v-else>{{ viewCount }} views</span>
           </div>
         </div>
@@ -161,7 +161,7 @@ import type { BlogContent, BlogPost } from '~/types/blog'
 const route = useRoute()
 const viewCount = ref<number>(0)
 
-const { isLoadingAnalytics, fetchAnalytics, getViewCount } = useAnalytics()
+const { isLoading: isLoadingStats, fetchBlogStats, getViewCount, updateBlogPosts } = useBlogStats()
 
 // Fetch the blog post content
 const { data } = await useAsyncData<BlogContent>(`content-${route.params.slug}`, async () => {
@@ -171,7 +171,6 @@ const { data } = await useAsyncData<BlogContent>(`content-${route.params.slug}`,
 
 // Get related posts from the blog posts composable
 const { blogPosts } = useBlogPosts()
-const { getCommentCounts } = useCommentCounts()
 
 const relatedPosts = computed(() => {
   const currentSlug = route.params.slug as string
@@ -180,26 +179,13 @@ const relatedPosts = computed(() => {
     .slice(0, 2) // Show 2 related posts
 })
 
-// Fetch analytics data and comment counts
+// Fetch blog stats (analytics + comment counts) in single API call
 onMounted(async () => {
   const currentSlug = route.params.slug as string
   
-  // Fetch analytics data for this specific post
-  await fetchAnalytics()
+  await fetchBlogStats()
   viewCount.value = getViewCount(currentSlug)
-  
-  // Fetch comment counts for all posts including related ones
-  try {
-    const allSlugs = blogPosts.value.map(post => post.slug)
-    const commentCounts = await getCommentCounts(allSlugs)
-    
-    // Update blog posts with real comment counts
-    blogPosts.value.forEach(post => {
-      post.comments = commentCounts[post.slug] || 0
-    })
-  } catch (error) {
-    console.error('Failed to fetch comment counts:', error)
-  }
+  updateBlogPosts(blogPosts.value)
 })
 
 const formatDate = (dateString: string | undefined): string => {

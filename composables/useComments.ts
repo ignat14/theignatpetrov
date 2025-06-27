@@ -64,6 +64,15 @@ export const useComments = (postSlug: string) => {
       // Add the new comment to the list
       comments.value.unshift(data[0] as BlogComment)
       
+      // Clear blog stats cache so comment counts refresh
+      if (process.client) {
+        try {
+          localStorage.removeItem('blog-stats-cache')
+        } catch (error) {
+          console.warn('Failed to clear stats cache:', error)
+        }
+      }
+      
       console.log('Comment submitted successfully:', data[0])
 
     } catch (error: any) {
@@ -113,22 +122,27 @@ export const useCommentCounts = () => {
 
   const getCommentCounts = async (postSlugs: string[]): Promise<Record<string, number>> => {
     try {
-      const { data, error } = await $supabase
-        .from('blog_comments')
-        .select('post_slug')
-        .in('post_slug', postSlugs)
+      // Use Promise.all to fetch counts for all posts in parallel
+      const countPromises = postSlugs.map(async (slug) => {
+        const { count, error } = await $supabase
+          .from('blog_comments')
+          .select('*', { count: 'exact', head: true })
+          .eq('post_slug', slug)
 
-      if (error) {
-        console.error('Error fetching comment counts:', error)
-        return {}
-      }
+        if (error) {
+          console.error(`Error fetching count for ${slug}:`, error)
+          return { slug, count: 0 }
+        }
 
-      // Count comments per post slug
-      const counts: Record<string, number> = {}
-      postSlugs.forEach(slug => { counts[slug] = 0 })
+        return { slug, count: count || 0 }
+      })
+
+      const results = await Promise.all(countPromises)
       
-      data?.forEach(comment => {
-        counts[comment.post_slug] = (counts[comment.post_slug] || 0) + 1
+      // Convert to object format
+      const counts: Record<string, number> = {}
+      results.forEach(result => {
+        counts[result.slug] = result.count
       })
 
       return counts
