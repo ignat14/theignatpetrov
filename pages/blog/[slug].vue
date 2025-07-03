@@ -87,7 +87,11 @@
         <!-- Author Bio -->
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
           <div class="flex items-start space-x-4">
-            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex-shrink-0"></div>
+            <img 
+              src="/images/profile_pic.jpeg" 
+              alt="Ignat Petrov"
+              class="w-16 h-16 rounded-full object-cover flex-shrink-0"
+            />
             <div>
               <h3 class="text-lg font-semibold text-white mb-2">Ignat Petrov</h3>
               <p class="text-gray-300 mb-4">
