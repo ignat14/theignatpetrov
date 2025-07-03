@@ -243,9 +243,6 @@ useHead({
 <style>
 .blog-content {
   @apply text-gray-300;
-  font-family: 'Charter', 'Georgia', 'Times New Roman', serif;
-  font-size: 1.125rem;
-  line-height: 1.7;
 }
 
 .blog-content h1,
@@ -255,8 +252,6 @@ useHead({
 .blog-content h5,
 .blog-content h6 {
   @apply text-white font-bold;
-  font-family: 'Charter', 'Georgia', 'Times New Roman', serif;
-  letter-spacing: -0.02em;
 }
 
 .blog-content h1 a,
@@ -278,19 +273,22 @@ useHead({
 }
 
 .blog-content h1 {
-  @apply text-3xl mb-6 mt-8;
+  @apply text-4xl mb-6 mt-8;
 }
 
 .blog-content h2 {
-  @apply text-2xl mb-4 mt-8;
+  @apply text-3xl mb-4 mt-8;
 }
 
 .blog-content h3 {
-  @apply text-xl mb-4 mt-6;
+  @apply text-2xl mb-4 mt-6;
 }
 
 .blog-content p {
   @apply mb-4 leading-relaxed;
+  font-family: 'Charter', 'Georgia', 'Times New Roman', serif;
+  font-size: 1.125rem;
+  line-height: 1.7;
 }
 
 .blog-content ul,

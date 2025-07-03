@@ -21,8 +21,6 @@ In the end, I chose what might seem like an extreme solution: I quit.
 
 There were other ways I could have tried to fix things, but it felt like the right time for a real reset. I’d been at a fast-paced startup for 3 years. The work had become repetitive and not challenging enough, adding to my frustration.
 
-### My plan
-
 The good thing that came out of this job is that I was able to save enough to give myself a 1 year personal runway so I decided to try something on my own. With the growing popularity of solo entrepreneurs and the improvements in the AI tools my goal became to try building something on my own.
 
 ### The First Month After Quitting: Honest Reflections
