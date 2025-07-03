@@ -33,9 +33,18 @@
           </div>
         </div>
 
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">
           {{ data?.title }}
         </h1>
+
+        <!-- Featured Image -->
+        <div class="mb-8">
+          <img 
+            :src="data?.image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&h=600&q=80'" 
+            :alt="data?.title || 'Blog post image'"
+            class="w-full h-64 md:h-80 object-cover rounded-lg border border-gray-700"
+          />
+        </div>
 
         <p class="text-xl text-gray-300 mb-8 leading-relaxed">
           {{ data?.description }}
@@ -230,6 +239,9 @@ useHead({
 <style>
 .blog-content {
   @apply text-gray-300;
+  font-family: 'Charter', 'Georgia', 'Times New Roman', serif;
+  font-size: 1.125rem;
+  line-height: 1.7;
 }
 
 .blog-content h1,
@@ -239,6 +251,26 @@ useHead({
 .blog-content h5,
 .blog-content h6 {
   @apply text-white font-bold;
+  font-family: 'Charter', 'Georgia', 'Times New Roman', serif;
+  letter-spacing: -0.02em;
+}
+
+.blog-content h1 a,
+.blog-content h2 a,
+.blog-content h3 a,
+.blog-content h4 a,
+.blog-content h5 a,
+.blog-content h6 a {
+  @apply text-white no-underline;
+}
+
+.blog-content h1 a:hover,
+.blog-content h2 a:hover,
+.blog-content h3 a:hover,
+.blog-content h4 a:hover,
+.blog-content h5 a:hover,
+.blog-content h6 a:hover {
+  @apply text-white no-underline;
 }
 
 .blog-content h1 {
