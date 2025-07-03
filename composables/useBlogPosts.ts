@@ -41,22 +41,12 @@ export const useBlogPosts = () => {
       // Fallback to hardcoded posts with calculated reading times
       blogPosts.value = [
         {
-          slug: 'creeping-in-comfort-zone',
-          title: 'Creeping in Comfort Zone',
-          excerpt: 'I thought that I was always keeping myself away from the Comfort Zone, failing to realize that it can come in different areas of life.',
-          date: '2025-06-27',
-          readTime: await getReadTimeForPost('creeping-in-comfort-zone'),
-          tags: ['Burnout', 'Comfort Zone', 'Mindfulness'],
-          views: 0,
-          comments: 0
-        },
-        {
-          slug: 'vue-3-composition-api',
-          title: 'Getting Started with Vue 3 Composition API [Example]',
-          excerpt: 'Learn how to use the new Composition API in Vue 3 to write more maintainable and reusable components.',
-          date: '2024-03-15',
+          slug: 'i-quit-my-job--reflections-on-the-first-month',
+          title: 'I Quit My 9–5 Job: Reflections on the First Month',
+          excerpt: 'Leaving a stable job is rarely easy, but sometimes you just know it’s time. I want to share a bit about what led me to quit, what I planned to do next, and how the first month has actually gone.',
+          date: '2025-07-03',
           readTime: await getReadTimeForPost('vue-3-composition-api'),
-          tags: ['Vue.js', 'JavaScript', 'Frontend'],
+          tags: ['Burnout', 'Procrastination', 'Quit', 'Solopreneur'],
           views: 0,
           comments: 0
         }

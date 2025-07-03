@@ -90,7 +90,7 @@
                   Learn more about me
                 </NuxtLink>
                 <a href="#" class="text-blue-400 hover:text-blue-300 text-sm font-medium">
-                  Follow on Twitter
+                  Follow on X
                 </a>
               </div>
             </div>
