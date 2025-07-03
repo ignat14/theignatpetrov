@@ -41,15 +41,6 @@
           {{ data?.description }}
         </p>
 
-        <div class="flex flex-wrap gap-2">
-          <span
-            v-for="tag in data?.tags"
-            :key="tag"
-            class="px-3 py-1 bg-gray-700 text-gray-300 text-sm rounded-full"
-          >
-            {{ tag }}
-          </span>
-        </div>
       </header>
 
       <!-- Article Content -->

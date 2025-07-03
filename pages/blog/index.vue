@@ -27,21 +27,6 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
             </div>
-            <div class="flex flex-wrap justify-center md:justify-start gap-2">
-              <button
-                v-for="tag in allTags"
-                :key="tag"
-                @click="toggleTag(tag)"
-                :class="[
-                  'px-3 py-1 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap',
-                  selectedTags.includes(tag)
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                ]"
-              >
-                {{ tag }}
-              </button>
-            </div>
           </div>
         </div>
 
@@ -58,15 +43,6 @@
                   <time class="text-sm text-gray-400">{{ formatDate(post.date) }}</time>
                   <span class="text-gray-500">•</span>
                   <span class="text-sm text-gray-400">{{ post.readTime }} min read</span>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                  <span
-                    v-for="tag in post.tags"
-                    :key="tag"
-                    class="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full"
-                  >
-                    {{ tag }}
-                  </span>
                 </div>
               </div>
               
@@ -138,7 +114,6 @@ import type { BlogPost } from '~/types/blog'
 import { BLOG_CONFIG } from '~/utils/config'
 
 const searchQuery = ref<string>('')
-const selectedTags = ref<string[]>([])
 const displayedPostsCount = ref<number>(BLOG_CONFIG.UI.POSTS_PER_PAGE)
 
 const { getAllPosts } = useBlogPosts()
@@ -152,13 +127,6 @@ onMounted(async () => {
   updateBlogPosts(blogPosts.value)
 })
 
-const allTags = computed<string[]>(() => {
-  const tags = new Set<string>()
-  blogPosts.value.forEach((post: BlogPost) => {
-    post.tags.forEach((tag: string) => tags.add(tag))
-  })
-  return Array.from(tags).sort()
-})
 
 const filteredPosts = computed<BlogPost[]>(() => {
   let posts: BlogPost[] = blogPosts.value
@@ -168,17 +136,10 @@ const filteredPosts = computed<BlogPost[]>(() => {
     const query = searchQuery.value.toLowerCase()
     posts = posts.filter((post: BlogPost) => 
       post.title.toLowerCase().includes(query) ||
-      post.excerpt.toLowerCase().includes(query) ||
-      post.tags.some(tag => tag.toLowerCase().includes(query))
+      post.excerpt.toLowerCase().includes(query)
     )
   }
 
-  // Filter by selected tags
-  if (selectedTags.value.length > 0) {
-    posts = posts.filter((post: BlogPost) =>
-      selectedTags.value.every(tag => post.tags.includes(tag))
-    )
-  }
 
   return posts.slice(0, displayedPostsCount.value)
 })
@@ -187,14 +148,6 @@ const hasMorePosts = computed<boolean>(() => {
   return filteredPosts.value.length < blogPosts.value.length
 })
 
-const toggleTag = (tag: string): void => {
-  const index = selectedTags.value.indexOf(tag)
-  if (index === -1) {
-    selectedTags.value.push(tag)
-  } else {
-    selectedTags.value.splice(index, 1)
-  }
-}
 
 const loadMorePosts = (): void => {
   displayedPostsCount.value += BLOG_CONFIG.UI.POSTS_PER_LOAD
