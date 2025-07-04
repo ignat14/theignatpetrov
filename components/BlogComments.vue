@@ -88,7 +88,7 @@
         <button
           type="submit"
           :disabled="isSubmitting || !form.username.trim() || !form.comment.trim()"
-          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="px-6 py-2 bg-cyan-800 text-white rounded-lg hover:bg-cyan-900 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500"
         >
           <span v-if="isSubmitting">Posting...</span>
           <span v-else>Post Comment</span>
@@ -134,7 +134,7 @@
       >
         <div class="flex items-start space-x-4">
           <!-- Avatar -->
-          <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex-shrink-0 flex items-center justify-center">
+          <div class="w-10 h-10 bg-gradient-to-r from-emerald-600 via-teal-700 to-cyan-800 rounded-full flex-shrink-0 flex items-center justify-center">
             <span class="text-white font-semibold text-sm">
               {{ comment.username.charAt(0).toUpperCase() }}
             </span>
