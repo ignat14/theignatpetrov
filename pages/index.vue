@@ -161,7 +161,7 @@
           </article>
         </div>
         <div class="text-center mt-12">
-          <NuxtLink to="/blog" class="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+          <NuxtLink to="/blog" class="bg-teal-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-teal-800 transition-colors">
             View All Posts
           </NuxtLink>
         </div>

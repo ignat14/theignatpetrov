@@ -19,7 +19,7 @@
               <img 
                 src="/images/profile_pic.jpeg" 
                 alt="Ignat Petrov"
-                class="w-full h-full object-cover rounded-full border-4 border-blue-500 shadow-lg"
+                class="w-full h-full object-cover rounded-full border-4 border-emerald-800 shadow-lg"
               />
               <div class="absolute inset-0 rounded-full shadow-inner"></div>
             </div>

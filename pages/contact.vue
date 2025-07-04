@@ -207,7 +207,7 @@
                     'w-full py-3 px-6 rounded-lg font-semibold transition-colors',
                     isSubmitting
                       ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-cyan-800 text-white hover:bg-cyan-900'
                   ]"
                 >
                   <span v-if="isSubmitting" class="flex items-center justify-center">
