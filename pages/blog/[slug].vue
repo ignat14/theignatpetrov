@@ -226,11 +226,37 @@ const shareOnLinkedIn = (): void => {
 }
 
 // SEO Meta
+const baseUrl = 'https://theignatpetrov.com' // Update this to your actual domain
+const currentUrl = `${baseUrl}${route.path}`
+const imageUrl = `${baseUrl}/images/profile_pic.jpeg` // Using profile pic as default
+
 useHead({
   title: data.value?.title || 'Blog Post',
   meta: [
+    // Basic SEO
     { name: 'description', content: data.value?.description || '' },
-    { name: 'keywords', content: data.value?.tags?.join(', ') || '' }
+    { name: 'keywords', content: data.value?.tags?.join(', ') || '' },
+    
+    // Open Graph (for Facebook, LinkedIn, etc.)
+    { property: 'og:title', content: data.value?.title || 'Blog Post' },
+    { property: 'og:description', content: data.value?.description || '' },
+    { property: 'og:type', content: 'article' },
+    { property: 'og:url', content: currentUrl },
+    { property: 'og:image', content: imageUrl },
+    { property: 'og:site_name', content: 'Ignat Petrov' },
+    
+    // Twitter Cards
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:site', content: '@theignatpetrov' },
+    { name: 'twitter:creator', content: '@theignatpetrov' },
+    { name: 'twitter:title', content: data.value?.title || 'Blog Post' },
+    { name: 'twitter:description', content: data.value?.description || '' },
+    { name: 'twitter:image', content: imageUrl },
+    
+    // Article specific
+    { property: 'article:author', content: 'Ignat Petrov' },
+    { property: 'article:published_time', content: data.value?.date || '' },
+    { property: 'article:tag', content: data.value?.tags?.join(', ') || '' }
   ]
 })
 </script>

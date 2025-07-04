@@ -160,4 +160,34 @@ const formatDate = (date: string): string => {
     day: 'numeric'
   })
 }
+
+// SEO Meta for Blog Index
+const baseUrl = 'https://theignatpetrov.com' // Update this to your actual domain
+const currentUrl = `${baseUrl}/blog`
+const imageUrl = `${baseUrl}/images/profile_pic.jpeg`
+
+useHead({
+  title: 'Blog - Ignat Petrov',
+  meta: [
+    // Basic SEO
+    { name: 'description', content: 'Thoughts on development, technology, and life by Ignat Petrov. Software engineer sharing insights on coding, productivity, and building cool projects.' },
+    { name: 'keywords', content: 'blog, software development, programming, technology, Vue.js, Python, freelancing' },
+    
+    // Open Graph (for Facebook, LinkedIn, etc.)
+    { property: 'og:title', content: 'Blog - Ignat Petrov' },
+    { property: 'og:description', content: 'Thoughts on development, technology, and life by Ignat Petrov. Software engineer sharing insights on coding, productivity, and building cool projects.' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: currentUrl },
+    { property: 'og:image', content: imageUrl },
+    { property: 'og:site_name', content: 'Ignat Petrov' },
+    
+    // Twitter Cards
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:site', content: '@theignatpetrov' },
+    { name: 'twitter:creator', content: '@theignatpetrov' },
+    { name: 'twitter:title', content: 'Blog - Ignat Petrov' },
+    { name: 'twitter:description', content: 'Thoughts on development, technology, and life by Ignat Petrov. Software engineer sharing insights on coding, productivity, and building cool projects.' },
+    { name: 'twitter:image', content: imageUrl }
+  ]
+})
 </script>
