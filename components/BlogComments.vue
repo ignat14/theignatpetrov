@@ -12,24 +12,47 @@
       <h3 class="text-lg font-semibold text-white mb-4">Leave a Comment</h3>
       
       <!-- Success Message -->
-      <SuccessMessage
+      <div
         v-if="submitSuccess"
-        message="Comment submitted successfully! Thank you for your feedback."
-        class="mb-4"
-        :dismissible="true"
-        @dismiss="resetForm"
-      />
+        class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center justify-between"
+      >
+        <div class="flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <span>Comment submitted successfully! Thank you for your feedback.</span>
+        </div>
+        <button @click="resetForm" class="text-green-700 hover:text-green-900">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+      </div>
 
       <!-- Error Message -->
-      <ErrorMessage
+      <div
         v-if="submitError"
-        :message="submitError"
-        class="mb-4"
-        :show-retry="true"
-        :dismissible="true"
-        @retry="handleSubmit"
-        @dismiss="resetForm"
-      />
+        class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            <span>{{ submitError }}</span>
+          </div>
+          <div class="flex space-x-2">
+            <button @click="handleSubmit" class="text-red-700 hover:text-red-900 underline">
+              Retry
+            </button>
+            <button @click="resetForm" class="text-red-700 hover:text-red-900">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
 
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
@@ -79,13 +102,17 @@
       <div v-if="isLoading" class="space-y-4">
         <div v-for="i in 3" :key="i" class="bg-gray-900 rounded-lg p-6 border border-gray-700">
           <div class="flex items-start space-x-4">
-            <LoadingSkeleton variant="avatar" />
+            <!-- Avatar skeleton -->
+            <div class="w-10 h-10 bg-gray-700 rounded-full animate-pulse"></div>
             <div class="flex-1 space-y-2">
               <div class="flex items-center space-x-2">
-                <LoadingSkeleton width="100px" height="16px" />
-                <LoadingSkeleton width="80px" height="14px" />
+                <!-- Name skeleton -->
+                <div class="w-24 h-4 bg-gray-700 rounded animate-pulse"></div>
+                <!-- Date skeleton -->
+                <div class="w-20 h-3 bg-gray-700 rounded animate-pulse"></div>
               </div>
-              <LoadingSkeleton width="100%" height="60px" />
+              <!-- Comment skeleton -->
+              <div class="w-full h-16 bg-gray-700 rounded animate-pulse"></div>
             </div>
           </div>
         </div>

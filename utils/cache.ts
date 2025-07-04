@@ -34,7 +34,7 @@ export class CacheManager<T> {
 
       return parsedCache.data
     } catch (error) {
-      console.warn(BLOG_CONFIG.ERRORS.CACHE_READ, error)
+      console.warn('Cache read error:', error)
       this.clear() // Clear corrupted cache
       return null
     }
@@ -53,7 +53,7 @@ export class CacheManager<T> {
       }
       localStorage.setItem(this.key, JSON.stringify(cacheData))
     } catch (error) {
-      console.warn(BLOG_CONFIG.ERRORS.CACHE_WRITE, error)
+      console.warn('Cache write error:', error)
     }
   }
 
@@ -113,7 +113,7 @@ export class CacheManager<T> {
 // Pre-configured cache managers for common use cases
 export const blogStatsCache = new CacheManager(
   BLOG_CONFIG.CACHE.BLOG_STATS_KEY,
-  BLOG_CONFIG.CACHE.BLOG_STATS_DURATION
+  BLOG_CONFIG.CACHE.DURATION
 )
 
 /**

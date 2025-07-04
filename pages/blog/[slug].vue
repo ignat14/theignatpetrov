@@ -181,11 +181,11 @@ const { data } = await useAsyncData<BlogContent>(`content-${route.params.slug}`,
 })
 
 // Get related posts from the blog posts composable
-const { blogPosts } = useBlogPosts()
+const { posts, getAllPosts } = useBlogPosts()
 
 const relatedPosts = computed(() => {
   const currentSlug = route.params.slug as string
-  return blogPosts.value
+  return posts.value
     .filter(post => post.slug !== currentSlug)
     .slice(0, BLOG_CONFIG.UI.RELATED_POSTS_COUNT)
 })
@@ -194,9 +194,12 @@ const relatedPosts = computed(() => {
 onMounted(async () => {
   const currentSlug = route.params.slug as string
   
+  // Load blog posts first
+  await getAllPosts()
+  
   await fetchBlogStats()
   viewCount.value = getViewCount(currentSlug)
-  updateBlogPosts(blogPosts.value)
+  updateBlogPosts(posts.value)
 })
 
 const formatDate = (dateString: string | undefined): string => {
