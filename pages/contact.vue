@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-900">
     <!-- Hero Section -->
-    <section class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white py-6 md:py-12">
+    <section class="bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-700 text-white py-6 md:py-12">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <h1 class="text-2xl md:text-4xl font-bold mb-2 md:mb-4">Get In Touch</h1>
