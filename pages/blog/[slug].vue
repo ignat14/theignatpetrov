@@ -225,10 +225,16 @@ const shareOnLinkedIn = (): void => {
   window.open(linkedinUrl, '_blank', 'width=600,height=400')
 }
 
-// SEO Meta
+// SEO Meta - Unique Twitter Card for each blog post
 const baseUrl = 'https://theignatpetrov.com' // Update this to your actual domain
 const currentUrl = `${baseUrl}${route.path}`
-const imageUrl = `${baseUrl}/images/profile_pic.jpeg` // Using profile pic as default
+
+// Use the same image logic as the blog post display  
+const blogPostImage = data.value?.image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&h=600&q=80'
+
+// Create compelling Twitter-specific title and description
+const twitterTitle = `${data.value?.title || 'Blog Post'} | Ignat Petrov`
+const twitterDescription = data.value?.description || 'Read this blog post about software development, technology, and building cool projects.'
 
 useHead({
   title: data.value?.title || 'Blog Post',
@@ -238,25 +244,29 @@ useHead({
     { name: 'keywords', content: data.value?.tags?.join(', ') || '' },
     
     // Open Graph (for Facebook, LinkedIn, etc.)
-    { property: 'og:title', content: data.value?.title || 'Blog Post' },
+    { property: 'og:title', content: twitterTitle },
     { property: 'og:description', content: data.value?.description || '' },
     { property: 'og:type', content: 'article' },
     { property: 'og:url', content: currentUrl },
-    { property: 'og:image', content: imageUrl },
-    { property: 'og:site_name', content: 'Ignat Petrov' },
+    { property: 'og:image', content: blogPostImage },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '600' },
+    { property: 'og:site_name', content: 'Ignat Petrov Blog' },
     
-    // Twitter Cards
+    // Twitter Cards - Optimized for individual blog posts
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:site', content: '@theignatpetrov' },
     { name: 'twitter:creator', content: '@theignatpetrov' },
-    { name: 'twitter:title', content: data.value?.title || 'Blog Post' },
-    { name: 'twitter:description', content: data.value?.description || '' },
-    { name: 'twitter:image', content: imageUrl },
+    { name: 'twitter:title', content: twitterTitle },
+    { name: 'twitter:description', content: twitterDescription },
+    { name: 'twitter:image', content: blogPostImage },
+    { name: 'twitter:image:alt', content: `Featured image for blog post: ${data.value?.title || 'Blog Post'}` },
     
-    // Article specific
+    // Article specific metadata
     { property: 'article:author', content: 'Ignat Petrov' },
-    { property: 'article:published_time', content: data.value?.date || '' },
-    { property: 'article:tag', content: data.value?.tags?.join(', ') || '' }
+    { property: 'article:published_time', content: data.value?.date ? new Date(data.value.date).toISOString() : '' },
+    { property: 'article:tag', content: data.value?.tags?.join(', ') || '' },
+    { property: 'article:section', content: 'Technology' }
   ]
 })
 </script>

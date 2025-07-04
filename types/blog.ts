@@ -15,5 +15,6 @@ export interface BlogContent {
   date: string
   readTime: number
   tags?: string[]
+  image?: string
   _path?: string
 }
