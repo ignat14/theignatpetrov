@@ -2,6 +2,7 @@
 title: 'Quitting My 9–5: Burnout, Procrastination, and Loss of Focus'
 description: 'Leaving a stable job is rarely easy, but sometimes you just know it’s time. I want to share a bit about what led me to quit, what I planned to do next, and how the first month has actually gone.'
 date: '2025-07-03'
+readTime: 2
 tags: ['Burnout', 'Procrastination', 'Quit', 'Solopreneur']
 ---
 
