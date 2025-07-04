@@ -42,7 +42,7 @@ export const useBlogPosts = () => {
       blogPosts.value = [
         {
           slug: 'i-quit-my-job--reflections-on-the-first-month',
-          title: 'I Quit My 9–5 Job: Reflections on the First Month',
+          title: 'Quitting My 9–5: Burnout, Procrastination, and Loss of Focus',
           excerpt: 'Leaving a stable job is rarely easy, but sometimes you just know it’s time. I want to share a bit about what led me to quit, what I planned to do next, and how the first month has actually gone.',
           date: '2025-07-03',
           readTime: await getReadTimeForPost('vue-3-composition-api'),
