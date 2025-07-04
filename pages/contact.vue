@@ -1,11 +1,11 @@
 <template>
   <div class="min-h-screen bg-gray-900">
     <!-- Hero Section -->
-    <section class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white py-20">
+    <section class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white py-6 md:py-12">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-          <h1 class="text-4xl md:text-6xl font-bold mb-6">Get In Touch</h1>
-          <p class="text-xl text-blue-100">Let's discuss your next project or collaboration</p>
+          <h1 class="text-2xl md:text-4xl font-bold mb-2 md:mb-4">Get In Touch</h1>
+          <p class="text-sm md:text-lg text-blue-100">Let's discuss your next project or collaboration</p>
         </div>
       </div>
     </section>

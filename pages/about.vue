@@ -1,11 +1,11 @@
 <template>
   <div class="min-h-screen bg-gray-900">
     <!-- Hero Section -->
-    <section class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white py-20">
+    <section class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white py-6 md:py-12">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-          <h1 class="text-4xl md:text-6xl font-bold mb-6">About Me</h1>
-          <p class="text-xl text-blue-100">Get to know the person behind the code</p>
+          <h1 class="text-2xl md:text-4xl font-bold mb-2 md:mb-4">About Me</h1>
+          <p class="text-sm md:text-lg text-blue-100">Get to know the man behind the code</p>
         </div>
       </div>
     </section>
@@ -27,7 +27,7 @@
           <div class="order-1 md:order-2 text-center md:text-left">
             <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6">Hi, I'm Ignat</h2>
             <p class="text-gray-300 text-lg mb-6">
-              I'm a passionate software engineer with over 9 years of experience building 
+              I'm a passionate software engineer with 10 years of experience building 
               scalable web applications. My journey in tech 
               actually started working at a VFX studio, and has evolved into a career 
               focused on creating meaningful solutions.
