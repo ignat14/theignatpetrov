@@ -1,73 +1,47 @@
-import { BetaAnalyticsDataClient } from '@google-analytics/data'
+import { createError, defineEventHandler } from 'h3'
+import { $fetch } from 'ofetch'
 
-export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
-  const query = getQuery(event)
-  
+export default defineEventHandler(async () => {
+  const projectId = process.env.POSTHOG_PROJECT_ID
+  const personalApiKey = process.env.POSTHOG_PERSONAL_API_KEY
+
   try {
-    // Use credentials from environment variable for production
-    let analyticsDataClient
-    if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-      const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
-      analyticsDataClient = new BetaAnalyticsDataClient({ credentials })
-    } else {
-      // Use Application Default Credentials for local development
-      analyticsDataClient = new BetaAnalyticsDataClient()
-    }
-
-    const [response] = await analyticsDataClient.runReport({
-      property: `properties/${config.gaPropertyId}`,
-      dateRanges: [
-        {
-          startDate: '30daysAgo',
-          endDate: 'today',
+    const response = await $fetch<{ results: [string, number][] }>(
+      `https://app.posthog.com/api/projects/${projectId}/query`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${personalApiKey}`,
+          'Content-Type': 'application/json',
         },
-      ],
-      dimensions: [
-        {
-          name: 'pagePath',
-        },
-        {
-          name: 'pageTitle',
-        },
-      ],
-      metrics: [
-        {
-          name: 'screenPageViews',
-        },
-      ],
-      dimensionFilter: {
-        filter: {
-          fieldName: 'pagePath',
-          stringFilter: {
-            matchType: 'CONTAINS',
-            value: '/blog/'
-          }
-        }
-      },
-      orderBys: [
-        {
-          metric: {
-            metricName: 'screenPageViews'
+        body: {
+          query: {
+            kind: 'HogQLQuery',
+            query: `
+              SELECT properties.$pathname AS path, count() AS views
+              FROM events
+              WHERE event = '$pageview'
+                AND properties.$pathname LIKE '/blog/%'
+                AND timestamp > now() - interval 30 day
+              GROUP BY path
+              ORDER BY views DESC
+            `,
           },
-          desc: true
-        }
-      ]
-    })
+        },
+      }
+    )
 
-    const pageViews = response.rows?.map(row => ({
-      path: row.dimensionValues?.[0]?.value || '',
-      title: row.dimensionValues?.[1]?.value || '',
-      views: parseInt(row.metricValues?.[0]?.value || '0')
-    })) || []
-
-    return pageViews
+    return (response.results ?? []).map((row: [string, number]) => ({
+      path: row[0],
+      title: '',
+      views: row[1],
+    }))
   } catch (error) {
-    console.error('Analytics API Error Details:', error)
+    console.error('PostHog Analytics API Error:', error)
     const errorMessage = error instanceof Error ? error.message : String(error)
     throw createError({
       statusCode: 500,
-      statusMessage: `Failed to fetch analytics data: ${errorMessage}`
+      statusMessage: `Failed to fetch analytics data: ${errorMessage}`,
     })
   }
 })

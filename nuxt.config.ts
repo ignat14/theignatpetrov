@@ -1,13 +1,10 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
-    gaPropertyId: process.env.GA_PROPERTY_ID,
     discordWebhookUrl: process.env.DISCORD_WEBHOOK_URL,
     discordUserId: process.env.DISCORD_USER_ID,
     public: {
-      gtag: {
-        id: process.env.NUXT_PUBLIC_GTAG_ID
-      },
+      posthogKey: process.env.NUXT_PUBLIC_POSTHOG_KEY,
       supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL,
       supabaseAnonKey: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY
     }

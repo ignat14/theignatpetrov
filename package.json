@@ -32,10 +32,9 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@google-analytics/data": "^5.1.0",
     "@nuxt/content": "^2.8.5",
     "@nuxtjs/tailwindcss": "^6.8.4",
     "@supabase/supabase-js": "^2.50.2",
-    "vue-gtag-next": "^1.14.0"
+    "posthog-js": "^1.347.2"
   }
 }
