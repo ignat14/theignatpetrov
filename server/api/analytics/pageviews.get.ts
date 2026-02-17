@@ -7,7 +7,7 @@ export default defineEventHandler(async () => {
 
   try {
     const response = await $fetch<{ results: [string, number][] }>(
-      `https://app.posthog.com/api/projects/${projectId}/query`,
+      `https://eu.posthog.com/api/projects/${projectId}/query`,
       {
         method: 'POST',
         headers: {

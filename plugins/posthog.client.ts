@@ -4,7 +4,7 @@ export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
 
   posthog.init(config.public.posthogKey as string, {
-    api_host: 'https://app.posthog.com',
+    api_host: 'https://eu.i.posthog.com',
     capture_pageview: true,
     capture_pageleave: true,
   })
