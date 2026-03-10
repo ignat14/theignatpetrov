@@ -1,14 +1,17 @@
 <template>
   <div>
     <!-- Hero Section -->
-    <section class="min-h-screen bg-surface-0 text-white flex items-center justify-center relative overflow-hidden pt-16">
+    <section
+      ref="heroSection"
+      class="min-h-screen bg-surface-0 text-white flex items-center justify-center relative overflow-hidden pt-16"
+    >
       <!-- Canvas particle background -->
       <canvas ref="particleCanvas" class="absolute inset-0 w-full h-full"></canvas>
 
       <!-- Text separation gradient background -->
-      <div class="absolute inset-0 z-5 hero-gradient"></div>
+      <div class="absolute inset-0 z-5 hero-gradient pointer-events-none"></div>
 
-      <div class="text-center z-10 relative">
+      <div class="text-center z-10 relative pointer-events-none">
         <h1 class="font-saira text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-8 text-neutral-100 text-center px-4 hero-title text-balance">
           Ignat Petrov
         </h1>
@@ -146,6 +149,7 @@ import { BLOG_CONFIG } from '~/utils/config'
 
 const currentTitle = ref<string>('')
 const particleCanvas = ref<HTMLCanvasElement>()
+const heroSection = ref<HTMLElement>()
 const { isLoading: isLoadingStats, fetchBlogStats, updateBlogPosts } = useBlogStats()
 const { getLatestPosts } = useBlogPosts()
 
@@ -327,6 +331,8 @@ interface FloatingChar {
   y: number
   vx: number
   vy: number
+  baseVx: number
+  baseVy: number
   char: string
   alpha: number
   targetAlpha: number
@@ -355,11 +361,15 @@ const createStreamDrop = (w: number, h: number, startAtTop: boolean = false): St
 }
 
 const createFloatingChar = (w: number, h: number): FloatingChar => {
+  const bvx = (Math.random() - 0.5) * 0.6
+  const bvy = (Math.random() - 0.5) * 0.6
   return {
     x: Math.random() * w,
     y: Math.random() * h,
-    vx: (Math.random() - 0.5) * 0.6,
-    vy: (Math.random() - 0.5) * 0.6,
+    vx: bvx,
+    vy: bvy,
+    baseVx: bvx,
+    baseVy: bvy,
     char: getRandomChar(FLOAT_CHARS),
     alpha: 0,
     targetAlpha: 0.15 + Math.random() * 0.35,
@@ -370,6 +380,11 @@ const createFloatingChar = (w: number, h: number): FloatingChar => {
     pulseSpeed: 0.5 + Math.random() * 1.5
   }
 }
+
+// Mouse tracking
+const mouse = { x: -1000, y: -1000, active: false }
+const MOUSE_RADIUS = 150 // influence radius
+const MOUSE_FORCE = 80   // repulsion strength
 
 const initParticleSystem = (): void => {
   const canvas = particleCanvas.value
@@ -389,6 +404,22 @@ const initParticleSystem = (): void => {
 
   resize()
   window.addEventListener('resize', resize)
+
+  // Mouse events on the hero section (above all overlays)
+  const section = heroSection.value
+  const onMouseMove = (e: MouseEvent): void => {
+    const rect = canvas.getBoundingClientRect()
+    mouse.x = e.clientX - rect.left
+    mouse.y = e.clientY - rect.top
+    mouse.active = true
+  }
+  const onMouseLeave = (): void => {
+    mouse.active = false
+  }
+  if (section) {
+    section.addEventListener('mousemove', onMouseMove)
+    section.addEventListener('mouseleave', onMouseLeave)
+  }
 
   const w = (): number => canvas.width / dpr
   const h = (): number => canvas.height / dpr
@@ -421,6 +452,16 @@ const initParticleSystem = (): void => {
     ctx.fillStyle = 'rgba(12, 12, 12, 0.15)'
     ctx.fillRect(0, 0, cw, ch)
 
+    // ── Mouse glow ──
+    if (mouse.active) {
+      const gradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, MOUSE_RADIUS)
+      gradient.addColorStop(0, 'rgba(245, 158, 11, 0.03)')
+      gradient.addColorStop(0.5, 'rgba(245, 158, 11, 0.01)')
+      gradient.addColorStop(1, 'rgba(245, 158, 11, 0)')
+      ctx.fillStyle = gradient
+      ctx.fillRect(mouse.x - MOUSE_RADIUS, mouse.y - MOUSE_RADIUS, MOUSE_RADIUS * 2, MOUSE_RADIUS * 2)
+    }
+
     // ── Falling code streams ──
     ctx.font = '13px "JetBrains Mono", "Courier New", monospace'
     ctx.textAlign = 'center'
@@ -436,27 +477,49 @@ const initParticleSystem = (): void => {
         s.changeTimer = 0
       }
 
+      // Mouse repulsion on stream x position (subtle horizontal push)
+      let streamOffsetX = 0
+      if (mouse.active) {
+        const dx = s.x - mouse.x
+        const dy = s.y - mouse.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < MOUSE_RADIUS && dist > 0) {
+          const force = (1 - dist / MOUSE_RADIUS) * MOUSE_FORCE * 0.3
+          streamOffsetX = (dx / dist) * force
+        }
+      }
+
       // Draw each character in the stream
       const charHeight = 16
       for (let i = 0; i < s.length; i++) {
         const cy = s.y - i * charHeight
         if (cy < -charHeight || cy > ch + charHeight) continue
 
+        // Per-character mouse proximity boost
+        let proximityBoost = 0
+        if (mouse.active) {
+          const cdx = (s.x + streamOffsetX) - mouse.x
+          const cdy = cy - mouse.y
+          const cdist = Math.sqrt(cdx * cdx + cdy * cdy)
+          if (cdist < MOUSE_RADIUS) {
+            proximityBoost = (1 - cdist / MOUSE_RADIUS) * 0.4
+          }
+        }
+
         // Head is brightest, tail fades out
         const headFade = i === 0 ? 1.0 : Math.max(0, 1 - i / s.length)
-        const a = s.opacity * headFade
+        const a = Math.min(1, s.opacity * headFade + proximityBoost)
 
         if (i === 0) {
-          // Bright head with glow
           ctx.fillStyle = `rgba(255, 220, 130, ${a})`
           ctx.shadowColor = `rgba(245, 158, 11, ${a * 0.8})`
-          ctx.shadowBlur = 8
+          ctx.shadowBlur = proximityBoost > 0.1 ? 12 : 8
         } else {
           ctx.fillStyle = `rgba(245, 158, 11, ${a * 0.7})`
           ctx.shadowBlur = 0
         }
 
-        ctx.fillText(s.chars[i], s.x, cy)
+        ctx.fillText(s.chars[i], s.x + streamOffsetX * (1 - i / s.length), cy)
       }
       ctx.shadowBlur = 0
 
@@ -468,12 +531,33 @@ const initParticleSystem = (): void => {
     }
 
     // ── Floating characters with connections ──
-
-    // Clear only the shadow/glow state
     ctx.shadowBlur = 0
 
     // Update floaters
     for (const f of floaters) {
+      // Mouse repulsion — add impulse velocity on top of base drift
+      if (mouse.active) {
+        const dx = f.x - mouse.x
+        const dy = f.y - mouse.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < MOUSE_RADIUS && dist > 0) {
+          const force = (1 - dist / MOUSE_RADIUS) * MOUSE_FORCE * dt
+          f.vx += (dx / dist) * force
+          f.vy += (dy / dist) * force
+        }
+      }
+
+      // Damp back toward base velocity (not toward zero)
+      f.vx += (f.baseVx - f.vx) * 0.02
+      f.vy += (f.baseVy - f.vy) * 0.02
+
+      // Clamp max speed so they don't fly off forever
+      const speed = Math.sqrt(f.vx * f.vx + f.vy * f.vy)
+      if (speed > 4) {
+        f.vx = (f.vx / speed) * 4
+        f.vy = (f.vy / speed) * 4
+      }
+
       f.x += f.vx
       f.y += f.vy
       f.pulse += f.pulseSpeed * dt
@@ -496,9 +580,10 @@ const initParticleSystem = (): void => {
       }
     }
 
-    // Draw connections
+    // Draw connections (including mouse-to-particle connections)
     ctx.lineWidth = 1
     for (let i = 0; i < floaters.length; i++) {
+      // Connect particles to each other
       for (let j = i + 1; j < floaters.length; j++) {
         const dx = floaters[i].x - floaters[j].x
         const dy = floaters[i].y - floaters[j].y
@@ -514,17 +599,53 @@ const initParticleSystem = (): void => {
           ctx.stroke()
         }
       }
+
+      // Connect particles to mouse cursor
+      if (mouse.active) {
+        const dx = floaters[i].x - mouse.x
+        const dy = floaters[i].y - mouse.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+
+        if (dist < MOUSE_RADIUS) {
+          const lineAlpha = (1 - dist / MOUSE_RADIUS) * 0.2 * floaters[i].alpha / 0.3
+          ctx.strokeStyle = `rgba(245, 158, 11, ${lineAlpha})`
+          ctx.beginPath()
+          ctx.moveTo(floaters[i].x, floaters[i].y)
+          ctx.lineTo(mouse.x, mouse.y)
+          ctx.stroke()
+        }
+      }
     }
 
     // Draw floating characters
     ctx.textBaseline = 'middle'
     for (const f of floaters) {
-      const pulseAlpha = f.alpha * (0.7 + 0.3 * Math.sin(f.pulse))
+      // Brightness boost near cursor
+      let boost = 0
+      if (mouse.active) {
+        const dx = f.x - mouse.x
+        const dy = f.y - mouse.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < MOUSE_RADIUS) {
+          boost = (1 - dist / MOUSE_RADIUS) * 0.4
+        }
+      }
+
+      const pulseAlpha = Math.min(1, f.alpha * (0.7 + 0.3 * Math.sin(f.pulse)) + boost)
       ctx.font = `${f.size}px "JetBrains Mono", "Courier New", monospace`
       ctx.textAlign = 'center'
-      ctx.fillStyle = `rgba(245, 158, 11, ${pulseAlpha})`
-      ctx.shadowColor = `rgba(245, 158, 11, ${pulseAlpha * 0.5})`
-      ctx.shadowBlur = 6
+
+      if (boost > 0.15) {
+        // Near cursor: brighter with stronger glow
+        ctx.fillStyle = `rgba(255, 220, 130, ${pulseAlpha})`
+        ctx.shadowColor = `rgba(245, 158, 11, ${pulseAlpha * 0.7})`
+        ctx.shadowBlur = 10
+      } else {
+        ctx.fillStyle = `rgba(245, 158, 11, ${pulseAlpha})`
+        ctx.shadowColor = `rgba(245, 158, 11, ${pulseAlpha * 0.5})`
+        ctx.shadowBlur = 6
+      }
+
       ctx.fillText(f.char, f.x, f.y)
     }
 
