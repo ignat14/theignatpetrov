@@ -2,12 +2,8 @@
   <div>
     <!-- Hero Section -->
     <section class="min-h-screen bg-surface-0 text-white flex items-center justify-center relative overflow-hidden pt-16">
-      <!-- Matrix rainfall background effect -->
-      <div ref="matrixContainer" class="absolute inset-0 overflow-hidden matrix-fade-in matrix-left">
-      </div>
-      <!-- Right side Matrix rainfall background effect -->
-      <div ref="matrixContainerRight" class="absolute inset-0 overflow-hidden matrix-fade-in matrix-right">
-      </div>
+      <!-- Canvas particle background -->
+      <canvas ref="particleCanvas" class="absolute inset-0 w-full h-full"></canvas>
 
       <!-- Text separation gradient background -->
       <div class="absolute inset-0 z-5 hero-gradient"></div>
@@ -39,7 +35,7 @@
           <h2 class="font-display text-3xl md:text-4xl font-bold text-neutral-100 text-balance">Building full-stack applications<br class="hidden sm:block" /> with modern technologies</h2>
         </div>
         <div class="grid md:grid-cols-3 gap-6">
-          <div class="group p-6 rounded-lg border border-neutral-700/40 bg-surface-1 hover:border-amber-400/30 transition-colors">
+          <div class="group p-6 rounded-lg border border-neutral-700/40 bg-surface-2 hover:border-amber-400/30 transition-colors">
             <div class="w-10 h-10 rounded-md bg-amber-400/10 flex items-center justify-center mb-5">
               <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
@@ -48,7 +44,7 @@
             <h3 class="font-display text-lg font-semibold mb-2 text-neutral-100">Frontend</h3>
             <p class="text-sm text-neutral-400 leading-relaxed">Vue.js, React, TypeScript, Tailwind CSS</p>
           </div>
-          <div class="group p-6 rounded-lg border border-neutral-700/40 bg-surface-1 hover:border-amber-400/30 transition-colors">
+          <div class="group p-6 rounded-lg border border-neutral-700/40 bg-surface-2 hover:border-amber-400/30 transition-colors">
             <div class="w-10 h-10 rounded-md bg-amber-400/10 flex items-center justify-center mb-5">
               <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
@@ -57,7 +53,7 @@
             <h3 class="font-display text-lg font-semibold mb-2 text-neutral-100">Backend</h3>
             <p class="text-sm text-neutral-400 leading-relaxed">Python, Django, FastAPI, PostgreSQL</p>
           </div>
-          <div class="group p-6 rounded-lg border border-neutral-700/40 bg-surface-1 hover:border-amber-400/30 transition-colors">
+          <div class="group p-6 rounded-lg border border-neutral-700/40 bg-surface-2 hover:border-amber-400/30 transition-colors">
             <div class="w-10 h-10 rounded-md bg-amber-400/10 flex items-center justify-center mb-5">
               <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
@@ -144,19 +140,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import type { BlogPost } from '~/types/blog'
 import { BLOG_CONFIG } from '~/utils/config'
 
 const currentTitle = ref<string>('')
-const matrixContainer = ref<HTMLElement>()
-const matrixContainerRight = ref<HTMLElement>()
+const particleCanvas = ref<HTMLCanvasElement>()
 const { isLoading: isLoadingStats, fetchBlogStats, updateBlogPosts } = useBlogStats()
 const { getLatestPosts } = useBlogPosts()
 
 const latestPosts = ref<BlogPost[]>([])
+let animationFrameId: number | null = null
 
-// Character sets for animations
+// Character sets for title animations
 const CHARACTER_SETS = {
   matrix: '!@#$%{}[]\\/?><;01',
   matrixWide: 'アイウエオカキクケコサシスセソタチツテト',
@@ -311,111 +307,233 @@ const transitionToMatrix = async (currentText: string, newLength: number): Promi
   currentTitle.value = displayChars.join('')
 }
 
+// ─── Canvas Particle System ───────────────────────────────────────────
 
-// Matrix rainfall configuration
-const RAINFALL_CONFIG = {
-  chars: '01アイウエオカキクケコサシスセソタチツテト!@#$%^&*(){}[]|\\:;"<>,.?/',
-  columnSpacing: 25,
-  positionVariation: 30,
-  driftRange: { min: 20, max: 80 },
-  duration: { min: 3, max: 8 },
-  delayMax: 2,
-  segments: { min: 3, max: 5 },
-  segmentLength: { min: 2, max: 35 },
-  gapLength: { min: 3, max: 8 },
-  changeInterval: { min: 500, max: 1500 }
-} as const
+const STREAM_CHARS = '01アイウエオカキクケコサシスセソ{}[]()<>/*\\=+-_;:!@#$%^&|~'
+const FLOAT_CHARS = 'function=>const{return}import;export()[]async/await<div>class.prototype:type'
 
-const calculateColumnPosition = (index: number, isRightSide: boolean, screenWidth: number) => {
-  const basePosition = isRightSide
-    ? screenWidth - (index * RAINFALL_CONFIG.columnSpacing)
-    : index * RAINFALL_CONFIG.columnSpacing
-
-  const variation = (Math.random() - 0.5) * RAINFALL_CONFIG.positionVariation
-  const startX = basePosition + variation
-
-  const driftDirection = isRightSide ? -1 : 1
-  const driftAmount = Math.random() * (RAINFALL_CONFIG.driftRange.max - RAINFALL_CONFIG.driftRange.min) + RAINFALL_CONFIG.driftRange.min
-  const driftX = driftDirection * driftAmount
-
-  return { startX, driftX }
+interface StreamDrop {
+  x: number
+  y: number
+  speed: number
+  chars: string[]
+  length: number
+  changeTimer: number
+  opacity: number
 }
 
-const generateRandomRange = (min: number, max: number): number => {
-  return min + Math.random() * (max - min)
+interface FloatingChar {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  char: string
+  alpha: number
+  targetAlpha: number
+  size: number
+  changeTimer: number
+  changeInterval: number
+  pulse: number
+  pulseSpeed: number
 }
 
-const generateRandomInt = (min: number, max: number): number => {
-  return min + Math.floor(Math.random() * (max - min + 1))
+const createStreamDrop = (w: number, h: number, startAtTop: boolean = false): StreamDrop => {
+  const length = 8 + Math.floor(Math.random() * 25)
+  const chars: string[] = []
+  for (let i = 0; i < length; i++) {
+    chars.push(getRandomChar(STREAM_CHARS))
+  }
+  return {
+    x: Math.random() * w,
+    y: startAtTop ? -(Math.random() * h * 0.5) : Math.random() * h,
+    speed: 30 + Math.random() * 80,
+    chars,
+    length,
+    changeTimer: 0,
+    opacity: 0.15 + Math.random() * 0.35
+  }
 }
 
-const generateColumnContent = (): string => {
-  let content = ''
-  const segments = generateRandomInt(RAINFALL_CONFIG.segments.min, RAINFALL_CONFIG.segments.max)
+const createFloatingChar = (w: number, h: number): FloatingChar => {
+  return {
+    x: Math.random() * w,
+    y: Math.random() * h,
+    vx: (Math.random() - 0.5) * 0.6,
+    vy: (Math.random() - 0.5) * 0.6,
+    char: getRandomChar(FLOAT_CHARS),
+    alpha: 0,
+    targetAlpha: 0.15 + Math.random() * 0.35,
+    size: 11 + Math.random() * 5,
+    changeTimer: 0,
+    changeInterval: 1500 + Math.random() * 3000,
+    pulse: Math.random() * Math.PI * 2,
+    pulseSpeed: 0.5 + Math.random() * 1.5
+  }
+}
 
-  for (let segment = 0; segment < segments; segment++) {
-    const segmentLength = generateRandomInt(RAINFALL_CONFIG.segmentLength.min, RAINFALL_CONFIG.segmentLength.max)
+const initParticleSystem = (): void => {
+  const canvas = particleCanvas.value
+  if (!canvas) return
 
-    for (let j = 0; j < segmentLength; j++) {
-      content += getRandomChar(RAINFALL_CONFIG.chars) + '\n'
-    }
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
 
-    if (segment < segments - 1) {
-      const gapLength = generateRandomInt(RAINFALL_CONFIG.gapLength.min, RAINFALL_CONFIG.gapLength.max)
-      for (let k = 0; k < gapLength; k++) {
-        content += ' \n'
+  const dpr = window.devicePixelRatio || 1
+
+  const resize = (): void => {
+    const rect = canvas.getBoundingClientRect()
+    canvas.width = rect.width * dpr
+    canvas.height = rect.height * dpr
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  }
+
+  resize()
+  window.addEventListener('resize', resize)
+
+  const w = (): number => canvas.width / dpr
+  const h = (): number => canvas.height / dpr
+
+  // Create falling code streams (the chaotic rain)
+  const streamCount = Math.round(45 * w() / 1920)
+  const streams: StreamDrop[] = Array.from(
+    { length: Math.max(25, Math.min(streamCount, 70)) },
+    () => createStreamDrop(w(), h())
+  )
+
+  // Create floating code particles (network nodes)
+  const floatCount = Math.round(50 * (w() * h()) / (1920 * 1080))
+  const floaters: FloatingChar[] = Array.from(
+    { length: Math.max(25, Math.min(floatCount, 60)) },
+    () => createFloatingChar(w(), h())
+  )
+
+  let lastTime = performance.now()
+  const CONNECTION_DIST = 140
+
+  const draw = (now: number): void => {
+    const dt = (now - lastTime) / 1000 // seconds
+    lastTime = now
+
+    const cw = w()
+    const ch = h()
+
+    // Semi-transparent clear for trail effect on streams
+    ctx.fillStyle = 'rgba(12, 12, 12, 0.15)'
+    ctx.fillRect(0, 0, cw, ch)
+
+    // ── Falling code streams ──
+    ctx.font = '13px "JetBrains Mono", "Courier New", monospace'
+    ctx.textAlign = 'center'
+
+    for (const s of streams) {
+      s.y += s.speed * dt
+
+      // Randomly mutate characters
+      s.changeTimer += dt
+      if (s.changeTimer > 0.15) {
+        const idx = Math.floor(Math.random() * s.length)
+        s.chars[idx] = getRandomChar(STREAM_CHARS)
+        s.changeTimer = 0
+      }
+
+      // Draw each character in the stream
+      const charHeight = 16
+      for (let i = 0; i < s.length; i++) {
+        const cy = s.y - i * charHeight
+        if (cy < -charHeight || cy > ch + charHeight) continue
+
+        // Head is brightest, tail fades out
+        const headFade = i === 0 ? 1.0 : Math.max(0, 1 - i / s.length)
+        const a = s.opacity * headFade
+
+        if (i === 0) {
+          // Bright head with glow
+          ctx.fillStyle = `rgba(255, 220, 130, ${a})`
+          ctx.shadowColor = `rgba(245, 158, 11, ${a * 0.8})`
+          ctx.shadowBlur = 8
+        } else {
+          ctx.fillStyle = `rgba(245, 158, 11, ${a * 0.7})`
+          ctx.shadowBlur = 0
+        }
+
+        ctx.fillText(s.chars[i], s.x, cy)
+      }
+      ctx.shadowBlur = 0
+
+      // Reset stream when it goes off screen
+      if (s.y - s.length * 16 > ch) {
+        Object.assign(s, createStreamDrop(cw, ch, true))
+        s.y = -(Math.random() * 200)
       }
     }
-  }
 
-  return content
-}
+    // ── Floating characters with connections ──
 
-const createMatrixColumn = (index: number, isRightSide: boolean, screenWidth: number): HTMLElement => {
-  const column = document.createElement('div')
-  column.className = isRightSide ? 'matrix-column-right' : 'matrix-column'
+    // Clear only the shadow/glow state
+    ctx.shadowBlur = 0
 
-  const { startX, driftX } = calculateColumnPosition(index, isRightSide, screenWidth)
+    // Update floaters
+    for (const f of floaters) {
+      f.x += f.vx
+      f.y += f.vy
+      f.pulse += f.pulseSpeed * dt
 
-  column.style.left = `${startX}px`
-  column.style.setProperty('--drift-x', `${driftX}px`)
+      if (f.x < -30) f.x = cw + 30
+      if (f.x > cw + 30) f.x = -30
+      if (f.y < -30) f.y = ch + 30
+      if (f.y > ch + 30) f.y = -30
 
-  const duration = generateRandomRange(RAINFALL_CONFIG.duration.min, RAINFALL_CONFIG.duration.max)
-  const animationDelay = Math.random() * RAINFALL_CONFIG.delayMax
+      // Fade in
+      if (f.alpha < f.targetAlpha) {
+        f.alpha = Math.min(f.alpha + dt * 0.3, f.targetAlpha)
+      }
 
-  column.style.animationDuration = `${duration}s`
-  column.style.animationDelay = `${animationDelay}s`
-
-  column.textContent = generateColumnContent()
-
-  const changeInterval = generateRandomRange(RAINFALL_CONFIG.changeInterval.min, RAINFALL_CONFIG.changeInterval.max)
-
-  setInterval(() => {
-    if (column.parentNode) {
-      column.textContent = generateColumnContent()
+      // Character change
+      f.changeTimer += dt * 1000
+      if (f.changeTimer > f.changeInterval) {
+        f.char = getRandomChar(FLOAT_CHARS)
+        f.changeTimer = 0
+      }
     }
-  }, changeInterval)
 
-  return column
-}
+    // Draw connections
+    ctx.lineWidth = 1
+    for (let i = 0; i < floaters.length; i++) {
+      for (let j = i + 1; j < floaters.length; j++) {
+        const dx = floaters[i].x - floaters[j].x
+        const dy = floaters[i].y - floaters[j].y
+        const dist = Math.sqrt(dx * dx + dy * dy)
 
-const createMatrixRainfall = (container: HTMLElement, isRightSide: boolean = false): void => {
-  const screenWidth = window.innerWidth
-  const columnCount = Math.floor(screenWidth / RAINFALL_CONFIG.columnSpacing)
+        if (dist < CONNECTION_DIST) {
+          const lineAlpha = (1 - dist / CONNECTION_DIST) * 0.12 *
+            Math.min(floaters[i].alpha, floaters[j].alpha) / 0.3
+          ctx.strokeStyle = `rgba(245, 158, 11, ${lineAlpha})`
+          ctx.beginPath()
+          ctx.moveTo(floaters[i].x, floaters[i].y)
+          ctx.lineTo(floaters[j].x, floaters[j].y)
+          ctx.stroke()
+        }
+      }
+    }
 
-  for (let i = 0; i < columnCount; i++) {
-    const column = createMatrixColumn(i, isRightSide, screenWidth)
-    container.appendChild(column)
+    // Draw floating characters
+    ctx.textBaseline = 'middle'
+    for (const f of floaters) {
+      const pulseAlpha = f.alpha * (0.7 + 0.3 * Math.sin(f.pulse))
+      ctx.font = `${f.size}px "JetBrains Mono", "Courier New", monospace`
+      ctx.textAlign = 'center'
+      ctx.fillStyle = `rgba(245, 158, 11, ${pulseAlpha})`
+      ctx.shadowColor = `rgba(245, 158, 11, ${pulseAlpha * 0.5})`
+      ctx.shadowBlur = 6
+      ctx.fillText(f.char, f.x, f.y)
+    }
+
+    ctx.shadowBlur = 0
+
+    animationFrameId = requestAnimationFrame(draw)
   }
-}
 
-const createMatrixRainfalls = (): void => {
-  if (matrixContainer.value) {
-    createMatrixRainfall(matrixContainer.value, false)
-  }
-  if (matrixContainerRight.value) {
-    createMatrixRainfall(matrixContainerRight.value, true)
-  }
+  animationFrameId = requestAnimationFrame(draw)
 }
 
 // Final animation word combinations
@@ -530,12 +648,18 @@ const formatDate = (dateString: string): string => {
 }
 
 onMounted(async () => {
-  createMatrixRainfalls()
+  initParticleSystem()
   startAnimation()
 
   await loadLatestPosts()
   await fetchBlogStats()
   updateBlogPosts(latestPosts.value)
+})
+
+onUnmounted(() => {
+  if (animationFrameId !== null) {
+    cancelAnimationFrame(animationFrameId)
+  }
 })
 
 // SEO Meta for Homepage
@@ -564,83 +688,6 @@ useHead({
 </script>
 
 <style scoped>
-.matrix-column,
-.matrix-column-right {
-  position: absolute;
-  top: -100vh;
-  width: 20px;
-  color: #f59e0b;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 12px;
-  line-height: 14px;
-  white-space: pre;
-  text-shadow: 0 0 2px rgba(245, 158, 11, 0.6);
-  --drift-x: 0px;
-}
-
-.matrix-column {
-  animation: matrix-column-fall linear infinite;
-}
-
-.matrix-column-right {
-  animation: matrix-column-fall-right linear infinite;
-}
-
-@keyframes matrix-column-fall {
-  0% {
-    transform: translateY(-100vh) translateX(0);
-    opacity: 0;
-  }
-  5% { opacity: 1; }
-  50% {
-    transform: translateY(0) translateX(calc(var(--drift-x) * 0.5));
-  }
-  95% { opacity: 1; }
-  100% {
-    transform: translateY(100vh) translateX(var(--drift-x));
-    opacity: 0;
-  }
-}
-
-@keyframes matrix-column-fall-right {
-  0% {
-    transform: translateY(-100vh) translateX(0);
-    opacity: 0;
-  }
-  5% { opacity: 1; }
-  50% {
-    transform: translateY(0) translateX(calc(var(--drift-x) * 0.5));
-  }
-  95% { opacity: 1; }
-  100% {
-    transform: translateY(100vh) translateX(var(--drift-x));
-    opacity: 0;
-  }
-}
-
-.matrix-fade-in {
-  opacity: 0;
-  animation: matrix-appear 5s ease-out forwards;
-}
-
-.matrix-left {
-  animation: matrix-appear-left 5s ease-out forwards;
-}
-
-.matrix-right {
-  animation: matrix-appear-right 5s ease-out forwards;
-}
-
-@keyframes matrix-appear-left {
-  from { opacity: 0; }
-  to { opacity: 0.06; }
-}
-
-@keyframes matrix-appear-right {
-  from { opacity: 0; }
-  to { opacity: 0.03; }
-}
-
 .hero-gradient {
   background: radial-gradient(
     ellipse 60% 40% at 50% 50%,
@@ -677,16 +724,6 @@ useHead({
   .hero-title {
     animation: none;
     letter-spacing: 0;
-  }
-  .matrix-fade-in,
-  .matrix-left,
-  .matrix-right {
-    animation: none;
-    opacity: 0.04;
-  }
-  .matrix-column,
-  .matrix-column-right {
-    animation: none;
   }
 }
 </style>
