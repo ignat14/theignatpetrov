@@ -821,8 +821,8 @@ useHead({
 }
 
 .hero-title {
-  letter-spacing: 0.8em;
-  animation: hero-spacing 4s ease-out forwards;
+  letter-spacing: 0;
+  animation: hero-spacing 4s ease-out backwards;
 }
 
 @keyframes hero-spacing {
