@@ -45,8 +45,7 @@ export const useBlogPosts = () => {
         date: '2025-07-03',
         readTime: 2,
         tags: ['Burnout', 'Procrastination', 'Quit', 'Solopreneur'],
-        views: 0,
-        comments: 0
+        views: 0
       }]
       isInitialized = true
     } finally {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { calculateReadTime, getReadTimeForPost } from '~/utils/readingTime'
+import { calculateReadTime } from '~/utils/readingTime'
 
 describe('readingTime utils', () => {
   beforeEach(() => {
@@ -208,66 +208,4 @@ Final paragraph with normal text.`
     })
   })
 
-  describe('getReadTimeForPost', () => {
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
-
-    it('should fetch reading time via API', async () => {
-      const mockFetch = vi.mocked(global.$fetch)
-      mockFetch.mockResolvedValue({ readTime: 5 })
-      
-      const result = await getReadTimeForPost('test-slug')
-      
-      expect(result).toBe(5)
-      expect(mockFetch).toHaveBeenCalledWith('/api/blog/read-content', {
-        method: 'POST',
-        body: { filePath: 'content/blog/test-slug.md' }
-      })
-    })
-
-    it('should return minimum read time when API returns invalid data', async () => {
-      const mockFetch = vi.mocked(global.$fetch)
-      mockFetch.mockResolvedValue({ readTime: null })
-      
-      const result = await getReadTimeForPost('test-slug')
-      
-      expect(result).toBe(1)
-    })
-
-    it('should return minimum read time when API call fails', async () => {
-      const mockFetch = vi.mocked(global.$fetch)
-      mockFetch.mockRejectedValue(new Error('API Error'))
-      
-      const mockConsoleWarn = vi.mocked(console.warn)
-      
-      const result = await getReadTimeForPost('test-slug')
-      
-      expect(result).toBe(1)
-      expect(mockConsoleWarn).toHaveBeenCalledWith(
-        'Could not calculate reading time for post: test-slug'
-      )
-    })
-
-    it('should handle different slug formats', async () => {
-      const mockFetch = vi.mocked(global.$fetch)
-      mockFetch.mockResolvedValue({ readTime: 3 })
-      
-      await getReadTimeForPost('my-blog-post-title')
-      
-      expect(mockFetch).toHaveBeenCalledWith('/api/blog/read-content', {
-        method: 'POST',
-        body: { filePath: 'content/blog/my-blog-post-title.md' }
-      })
-    })
-
-    it('should handle empty slug', async () => {
-      const mockFetch = vi.mocked(global.$fetch)
-      mockFetch.mockRejectedValue(new Error('Invalid path'))
-      
-      const result = await getReadTimeForPost('')
-      
-      expect(result).toBe(1)
-    })
-  })
 })

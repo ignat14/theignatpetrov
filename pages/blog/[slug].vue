@@ -177,7 +177,7 @@ const relatedPosts = computed(() => {
     .slice(0, BLOG_CONFIG.UI.RELATED_POSTS_COUNT)
 })
 
-// Fetch blog stats (analytics + comment counts) in single API call
+// Fetch blog stats (analytics) on mount
 onMounted(async () => {
   const currentSlug = route.params.slug as string
   
