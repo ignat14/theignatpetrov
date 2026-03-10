@@ -4,9 +4,7 @@ export default defineNuxtConfig({
     discordWebhookUrl: process.env.DISCORD_WEBHOOK_URL,
     discordUserId: process.env.DISCORD_USER_ID,
     public: {
-      posthogKey: process.env.NUXT_PUBLIC_POSTHOG_KEY,
-      supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL,
-      supabaseAnonKey: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY
+      posthogKey: process.env.NUXT_PUBLIC_POSTHOG_KEY
     }
   },
   modules: [

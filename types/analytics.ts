@@ -10,7 +10,6 @@ export type AnalyticsData = AnalyticsDataPoint[]
 // API response types
 export interface BlogStatsResponse {
   analytics: AnalyticsData
-  commentCounts: Record<string, number>
 }
 
 // Error handling types

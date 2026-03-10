@@ -7,7 +7,6 @@ Personal portfolio and blog site for Ignat Petrov (Software Engineer).
 - **Framework**: Nuxt 3 (Vue 3 + TypeScript, strict mode)
 - **Styling**: Tailwind CSS v3, custom font `Saira Condensed`, dark theme throughout
 - **Content**: `@nuxt/content` for markdown-based blog posts
-- **Database**: Supabase (PostgreSQL) — contact messages + blog comments
 - **Analytics**: PostHog via `posthog-js` (client) + PostHog Query API / HogQL (server)
 - **Notifications**: Discord webhooks on contact form submit
 - **Testing**: Vitest (unit), Cypress (E2E)
@@ -16,53 +15,74 @@ Personal portfolio and blog site for Ignat Petrov (Software Engineer).
 ## Project Structure
 
 ```
-app.vue                  # Root component
+app.vue                  # Root component (NuxtLayout + NuxtPage)
 nuxt.config.ts           # Nuxt config — modules, runtimeConfig, SEO meta
 tailwind.config.js       # Custom font, content scan paths
+vercel.json              # Vercel deployment config (build, routes)
 assets/css/main.css      # Tailwind directives
+
+layouts/
+  default.vue            # Main layout — Navigation + footer wrapper
 
 pages/
   index.vue              # Home: matrix hero, skills, latest blog posts
-  about.vue              # Bio, skills, experience
+  about.vue              # Bio, skills, experience timeline
   portfolio.vue          # Project gallery (disabled in nav, route exists)
-  contact.vue            # Contact form → Supabase + Discord webhook
+  contact.vue            # Contact form → Discord webhook
   blog/
     index.vue            # Blog listing with search
-    [slug].vue           # Individual post with comments
+    [slug].vue           # Individual post with related posts
 
 components/
   Navigation.vue         # Responsive nav, mobile menu (Portfolio link hidden)
-  BlogComments.vue       # Supabase-connected comment section
   ui/
-    ErrorMessage.vue
-    SuccessMessage.vue
-    LoadingSkeleton.vue
+    ErrorMessage.vue     # Configurable alert (error/warning/info variants)
+    SuccessMessage.vue   # Dismissible green success alert
+    LoadingSkeleton.vue  # Loading placeholder
 
 composables/
-  useBlogPosts.ts        # Load/query blog posts from content
-  useBlogStats.ts        # Fetch + cache view counts and comment counts
-  useComments.ts         # CRUD for blog comments via Supabase
-  useContactForm.ts      # Contact form state and submission
+  useBlogPosts.ts        # Load/query blog posts from @nuxt/content
+  useBlogStats.ts        # Fetch + cache view counts from PostHog
+  useContactForm.ts      # Contact form submission via Discord webhook
 
 server/api/
   analytics/pageviews.get.ts       # PostHog HogQL Query API — 30-day views for /blog/* paths
-  blog/stats.get.ts                # Combined stats (views + comment counts)
+  blog/stats.get.ts                # Blog stats (analytics only)
   contact/discord-notify.post.ts   # Discord webhook notification
 
 content/blog/            # Markdown blog posts (slug = filename)
 
-types/                   # Shared TypeScript interfaces (blog, comment, contact, etc.)
+types/
+  about.ts               # Skill, Experience, Value
+  analytics.ts           # AnalyticsDataPoint, BlogStatsResponse, ApiError, ApiResponse<T>
+  blog.ts                # BlogPost, BlogContent
+  contact.ts             # ContactForm
+  navigation.ts          # NavItem, NavigationState
+  portfolio.ts           # ProjectCategory, ProjectStatus, Project
+
 utils/
-  cache.ts               # CacheManager — localStorage with TTL (5 min default)
-  config.ts              # BLOG_CONFIG constants
-  readingTime.ts         # Reading time from markdown
-  errorHandling.ts       # Centralized error utilities
+  cache.ts               # CacheManager class + blogStatsCache instance (localStorage + TTL)
+  config.ts              # BLOG_CONFIG constants (UI, API, CACHE, ERRORS sections)
+  readingTime.ts         # calculateReadTime() — 200 wpm, strips markdown
+  errorHandling.ts       # ErrorFactory, ErrorHandler, ErrorUtils (safeAsync, retry, etc.)
 
 plugins/
-  posthog.client.ts      # PostHog analytics (client only — auto-captures pageviews)
-  supabase.client.ts     # Supabase client init
+  posthog.client.ts      # PostHog analytics (client only — EU region, auto-captures pageviews)
 
-supabase-schema.sql      # Database schema for reference
+public/
+  favicon.svg            # Site favicon
+  images/profile_pic.jpeg
+  robots.txt
+  sitemap.xml
+
+tests/
+  setup.ts               # Global test setup + mocks
+  utils/                 # Unit tests for cache, config, readingTime, errorHandling
+  server/api/            # API endpoint tests for blog stats + content
+  disabled/              # Composable tests (need Nuxt module setup)
+
+cypress/
+  e2e/smoke.cy.ts        # Smoke tests: home, nav, mobile menu, footer
 ```
 
 ## Blog Post Format
@@ -75,22 +95,15 @@ description: 'Short description'
 date: '2025-07-03'
 tags: ['Vue.js', 'TypeScript']
 readTime: 5
+image: 'https://...'
 ---
 ```
 
 Slug = filename (e.g. `my-post.md` → `/blog/my-post`).
 
-## Database Tables (Supabase)
-
-**contact_messages**: `id`, `first_name`, `last_name`, `email`, `company`, `subject`, `message`, `created_at`, `updated_at`
-
-**blog_comments**: `id`, `post_slug`, `username`, `comment`, `created_at`, `updated_at`
-
 ## Environment Variables
 
 ```env
-NUXT_PUBLIC_SUPABASE_URL=
-NUXT_PUBLIC_SUPABASE_ANON_KEY=
 NUXT_PUBLIC_POSTHOG_KEY=      # phc_xxx — Project Settings → Project API key
 POSTHOG_PROJECT_ID=           # numeric ID — Project Settings
 POSTHOG_PERSONAL_API_KEY=     # phx_xxx — Personal Settings → Personal API keys
@@ -121,10 +134,21 @@ npm run test:e2e      # headless E2E (starts dev server)
 - **Dark theme**: `bg-gray-900` / `bg-gray-800` base, emerald/teal/cyan accents
 - **Cypress hooks**: UI components use `data-cy` attributes for E2E selectors
 
+## Testing
+
+- **Vitest**: `npm run test` — uses happy-dom environment, global setup in `tests/setup.ts`
+- **Cypress**: `npm run cypress:open` — smoke tests only, uses `data-cy` selectors
+- **Disabled tests** in `tests/disabled/` need Nuxt module setup to work (composables)
+- **Coverage**: `npm run test:coverage` via `@vitest/coverage-v8`
+
 ## Things to Know
 
 - Portfolio page (`/portfolio`) exists but its nav link is **hidden** — intentional
 - Home page has a matrix-rain hero animation with character morphing — styles are in scoped `<style>` inside `pages/index.vue`
-- Blog view counts come from PostHog (server-side HogQL query via `/api/analytics/pageviews`), not stored in Supabase — counts will be 0 until PostHog accumulates data
-- Contact form submissions are saved to Supabase **and** trigger a Discord webhook simultaneously
-- The `useBlogStats` composable caches the combined stats response client-side to avoid redundant API calls
+- Blog view counts come from PostHog (server-side HogQL query via `/api/analytics/pageviews`) — counts will be 0 until PostHog accumulates data
+- Contact form submissions trigger a Discord webhook (no database)
+- The `useBlogStats` composable caches the stats response client-side to avoid redundant API calls
+- PostHog uses **EU region** (`https://eu.i.posthog.com`)
+- Plugins gracefully warn (not crash) when env vars are missing — safe for local dev without keys
+- No CI/CD workflows — relies on Vercel's built-in CI/CD
+- No light mode — dark theme only, no toggle

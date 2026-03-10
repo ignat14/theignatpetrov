@@ -114,13 +114,6 @@
       </div>
     </article>
 
-    <!-- Comments Section -->
-    <section class="bg-gray-800 py-16">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <BlogComments :post-slug="route.params.slug as string" />
-      </div>
-    </section>
-
     <!-- Related Posts -->
     <section class="bg-gray-900 py-16">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -149,12 +142,6 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                 </svg>
                 {{ post.views }} views
-              </span>
-              <span class="flex items-center">
-                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                </svg>
-                {{ post.comments }} comments
               </span>
             </div>
           </article>

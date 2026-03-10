@@ -29,7 +29,6 @@ export const useBlogPosts = () => {
           readTime: content.readTime || 1,
           tags: content.tags || [],
           views: 0,
-          comments: 0
         }
       })
       
