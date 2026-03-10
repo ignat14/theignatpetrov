@@ -1,99 +1,79 @@
 <template>
-  <div class="min-h-screen bg-gray-900">
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-r from-emerald-600 via-teal-700 to-cyan-800 text-white py-6 md:py-12">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-          <h1 class="text-2xl md:text-4xl font-bold mb-2 md:mb-4">Blog</h1>
-          <p class="text-sm md:text-lg text-blue-100">Thoughts on development, technology, and life</p>
-        </div>
+  <div class="min-h-screen bg-surface-0 pt-16">
+    <!-- Header -->
+    <section class="pt-16 pb-8">
+      <div class="max-w-3xl mx-auto px-6 lg:px-8">
+        <p class="text-xs font-mono uppercase tracking-[0.2em] text-amber-400/80 mb-3">Blog</p>
+        <h1 class="font-display text-3xl md:text-5xl font-bold text-neutral-100 mb-4 text-balance">Thoughts on development, technology, and life</h1>
       </div>
     </section>
 
     <!-- Blog Posts Section -->
-    <section class="py-20">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Search and Filter -->
+    <section class="pb-24">
+      <div class="max-w-3xl mx-auto px-6 lg:px-8">
+        <!-- Search -->
         <div class="mb-12">
-          <div class="flex flex-col gap-4">
-            <div class="relative max-w-md mx-auto md:mx-0">
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search posts..."
-                class="w-full px-4 py-2 pl-10 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-              <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </div>
+          <div class="relative max-w-sm">
+            <input
+              v-model="searchQuery"
+              type="text"
+              name="search"
+              autocomplete="off"
+              placeholder="Search posts..."
+              class="w-full px-4 py-2.5 pl-10 bg-surface-2 border border-neutral-700/40 rounded-lg text-neutral-100 placeholder-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 focus-visible:border-transparent text-sm transition-colors"
+            >
+            <svg class="absolute left-3 top-3 h-4 w-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
           </div>
         </div>
 
-        <!-- Blog Posts Grid -->
-        <div class="space-y-8">
+        <!-- Blog Posts List -->
+        <div class="space-y-2">
           <article
             v-for="post in filteredPosts"
             :key="post.slug"
-            class="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors border border-gray-700"
+            class="group -mx-4 px-4 py-5 rounded-lg hover:bg-surface-1 transition-colors"
           >
-            <div class="p-6 sm:p-8">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-                <div class="flex items-center space-x-4">
-                  <time class="text-sm text-gray-400">{{ formatDate(post.date) }}</time>
-                  <span class="text-gray-500">•</span>
-                  <span class="text-sm text-gray-400">{{ post.readTime }} min read</span>
-                </div>
+            <NuxtLink :to="`/blog/${post.slug}`" class="block">
+              <div class="flex items-center gap-3 text-xs text-neutral-500 mb-2 font-mono">
+                <time>{{ formatDate(post.date) }}</time>
+                <span class="text-neutral-700">/</span>
+                <span>{{ post.readTime }} min</span>
+                <span class="text-neutral-700">/</span>
+                <span class="flex items-center gap-1">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  <span v-if="isLoadingStats" class="inline-block w-8 h-3 bg-neutral-800 rounded animate-pulse"></span>
+                  <span v-else>{{ post.views }}</span>
+                </span>
               </div>
-              
-              <h2 class="text-2xl font-bold text-white mb-4 hover:text-blue-400 transition-colors">
-                <NuxtLink :to="`/blog/${post.slug}`">
-                  {{ post.title }}
-                </NuxtLink>
+
+              <h2 class="font-display text-xl font-semibold text-neutral-100 mb-2 group-hover:text-amber-400 transition-colors">
+                {{ post.title }}
               </h2>
-              
-              <p class="text-gray-300 mb-6 leading-relaxed">
+
+              <p class="text-sm text-neutral-400 leading-relaxed line-clamp-2">
                 {{ post.excerpt }}
               </p>
-              
-              <div class="flex items-center justify-between">
-                <NuxtLink 
-                  :to="`/blog/${post.slug}`"
-                  class="inline-flex items-center text-blue-400 hover:text-blue-300 font-medium"
-                >
-                  Read more
-                  <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                  </svg>
-                </NuxtLink>
-                
-                <div class="flex items-center space-x-4 text-sm text-gray-400">
-                  <span class="flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                    </svg>
-                    <span v-if="isLoadingStats" class="inline-block w-8 h-4 bg-gray-600 rounded animate-pulse"></span>
-                    <span v-else>{{ post.views }} views</span>
-                  </span>
-                </div>
-              </div>
-            </div>
+            </NuxtLink>
           </article>
         </div>
 
         <!-- No posts message -->
-        <div v-if="filteredPosts.length === 0" class="text-center py-12">
-          <p class="text-gray-400">No posts found matching your criteria.</p>
+        <div v-if="filteredPosts.length === 0" class="text-center py-16">
+          <p class="text-neutral-500">No posts found matching your search.</p>
         </div>
 
         <!-- Load More Button -->
         <div v-if="hasMorePosts" class="text-center mt-12">
           <button
             @click="loadMorePosts"
-            class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            class="px-6 py-2.5 rounded-lg text-sm font-medium border border-neutral-700/40 text-neutral-300 hover:text-amber-400 hover:border-amber-400/40 transition-colors"
           >
-            Load More Posts
+            Load More
           </button>
         </div>
       </div>
@@ -124,15 +104,13 @@ onMounted(async () => {
 const filteredPosts = computed<BlogPost[]>(() => {
   let posts: BlogPost[] = blogPosts.value
 
-  // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    posts = posts.filter((post: BlogPost) => 
+    posts = posts.filter((post: BlogPost) =>
       post.title.toLowerCase().includes(query) ||
       post.excerpt.toLowerCase().includes(query)
     )
   }
-
 
   return posts.slice(0, displayedPostsCount.value)
 })
@@ -149,32 +127,27 @@ const loadMorePosts = (): void => {
 const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric'
   })
 }
 
 // SEO Meta for Blog Index
-const baseUrl = 'https://theignatpetrov.com' // Update this to your actual domain
+const baseUrl = 'https://theignatpetrov.com'
 const currentUrl = `${baseUrl}/blog`
 const imageUrl = `${baseUrl}/images/profile_pic.jpeg`
 
 useHead({
   title: 'Blog - Ignat Petrov',
   meta: [
-    // Basic SEO
     { name: 'description', content: 'Thoughts on development, technology, and life by Ignat Petrov. Software engineer sharing insights on coding, productivity, and building cool projects.' },
     { name: 'keywords', content: 'blog, software development, programming, technology, Vue.js, Python, freelancing' },
-    
-    // Open Graph (for Facebook, LinkedIn, etc.)
     { property: 'og:title', content: 'Blog - Ignat Petrov' },
     { property: 'og:description', content: 'Thoughts on development, technology, and life by Ignat Petrov. Software engineer sharing insights on coding, productivity, and building cool projects.' },
     { property: 'og:type', content: 'website' },
     { property: 'og:url', content: currentUrl },
     { property: 'og:image', content: imageUrl },
     { property: 'og:site_name', content: 'Ignat Petrov' },
-    
-    // Twitter Cards
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:site', content: '@theignatpetrov' },
     { name: 'twitter:creator', content: '@theignatpetrov' },
