@@ -69,8 +69,69 @@
       </div>
     </section>
 
-    <!-- Recent Blog Posts -->
+    <!-- Featured Project -->
     <section class="py-24 md:py-32 bg-surface-0">
+      <div class="max-w-5xl mx-auto px-6 lg:px-8">
+        <div class="flex items-end justify-between mb-12">
+          <div>
+            <p class="text-xs font-mono uppercase tracking-[0.2em] text-amber-400/80 mb-3">Projects</p>
+            <h2 class="font-display text-3xl md:text-4xl font-bold text-neutral-100">What I'm Building</h2>
+          </div>
+          <NuxtLink
+            to="/projects"
+            class="hidden sm:inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-amber-400 transition-colors"
+          >
+            View all
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+            </svg>
+          </NuxtLink>
+        </div>
+        <a
+          href="https://switchbox.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group block rounded-xl border border-neutral-700/40 bg-surface-1 overflow-hidden hover:border-amber-400/30 transition-colors"
+        >
+          <div class="p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-6">
+            <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-amber-400/10 flex items-center justify-center">
+              <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-3 mb-1">
+                <h3 class="font-display text-xl font-semibold text-neutral-100 group-hover:text-amber-400 transition-colors">Switchbox</h3>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-400/10 text-emerald-400">
+                  <span class="w-1 h-1 rounded-full bg-emerald-400"></span>
+                  Live
+                </span>
+              </div>
+              <p class="text-sm text-neutral-400 leading-relaxed">A developer tool for managing feature flags and configuration switches across your applications.</p>
+            </div>
+            <div class="flex-shrink-0 hidden sm:flex items-center text-neutral-500 group-hover:text-amber-400 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+              </svg>
+            </div>
+          </div>
+        </a>
+        <div class="text-center mt-10 sm:hidden">
+          <NuxtLink
+            to="/projects"
+            class="inline-flex items-center gap-2 text-sm font-medium text-amber-400 hover:text-amber-300 transition-colors"
+          >
+            View all projects
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+            </svg>
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Blog Posts -->
+    <section class="py-24 md:py-32 bg-surface-1">
       <div class="max-w-5xl mx-auto px-6 lg:px-8">
         <div class="flex items-end justify-between mb-12">
           <div>

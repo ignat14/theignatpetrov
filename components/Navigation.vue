@@ -73,7 +73,7 @@ import type { NavItem, NavigationState } from '~/types/navigation'
 const navItems: NavItem[] = [
   { path: '/', label: 'Home' },
   { path: '/about', label: 'About' },
-  // { path: '/portfolio', label: 'Portfolio' },
+  { path: '/projects', label: 'Projects' },
   { path: '/blog', label: 'Blog' },
   { path: '/contact', label: 'Contact' }
 ]
