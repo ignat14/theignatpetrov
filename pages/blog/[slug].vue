@@ -22,15 +22,6 @@
             <time>{{ formatDate(data?.date) }}</time>
             <span class="text-neutral-700">/</span>
             <span>{{ data?.readTime }} min read</span>
-            <span class="text-neutral-700">/</span>
-            <div class="flex items-center gap-1">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
-              <span v-if="isLoadingStats" class="inline-block w-8 h-3 bg-neutral-800 rounded animate-pulse"></span>
-              <span v-else>{{ viewCount }}</span>
-            </div>
           </div>
 
           <h1 class="font-display text-3xl md:text-5xl font-bold text-neutral-100 mb-8 leading-tight text-balance">
@@ -145,14 +136,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import type { BlogContent, BlogPost } from '~/types/blog'
 import { BLOG_CONFIG } from '~/utils/config'
 
 const route = useRoute()
-const viewCount = ref<number>(0)
-
-const { isLoading: isLoadingStats, fetchBlogStats, getViewCount, updateBlogPosts } = useBlogStats()
 
 // Fetch the blog post content
 const { data } = await useAsyncData<BlogContent>(`content-${route.params.slug}`, async () => {
@@ -170,15 +158,8 @@ const relatedPosts = computed(() => {
     .slice(0, BLOG_CONFIG.UI.RELATED_POSTS_COUNT)
 })
 
-// Fetch blog stats (analytics) on mount
 onMounted(async () => {
-  const currentSlug = route.params.slug as string
-
   await getAllPosts()
-
-  await fetchBlogStats()
-  viewCount.value = getViewCount(currentSlug)
-  updateBlogPosts(posts.value)
 })
 
 const formatDate = (dateString: string | undefined): string => {

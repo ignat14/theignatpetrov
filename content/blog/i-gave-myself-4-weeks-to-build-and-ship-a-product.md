@@ -2,7 +2,7 @@
 title: 'I Gave Myself 4 Weeks to Build and Ship a Product'
 description: "I've been overthinking this step for way too long. So now I have a new rule: pick anything, build it in 4 weeks and ship a full product. Doesn't matter what happens next"
 date: '2026-03-10'
-readTime: 5
+readTime: 2
 tags: []
 image: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&h=600&q=80'
 ---
