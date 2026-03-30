@@ -32,10 +32,10 @@
                 I'm a passionate software engineer with 10 years of experience building
                 scalable web applications. My journey in tech
                 actually started working at a VFX studio, and has evolved into a career
-                focused on creating meaningful solutions.
+                focused on creating meaningful software solutions.
               </p>
               <p>
-                I'm currently transitioning into solopreneurship, and I'm looking for new challenges.
+                I'm currently transitioning into solopreneurship, and I'm always looking for new challenges.
                 My plan is to use my skills and experience to start building some cool stuff.
               </p>
               <p>
@@ -74,22 +74,43 @@
             <div
               v-for="(exp, index) in experiences"
               :key="exp.title"
-              class="relative pl-8 pb-10 last:pb-0"
+              class="relative pl-8 pb-8 last:pb-0"
             >
               <!-- Timeline line -->
               <div
                 v-if="index < experiences.length - 1"
                 class="absolute left-[5px] top-3 bottom-0 w-px bg-neutral-700/40"
               ></div>
-              <!-- Timeline dot -->
-              <div class="absolute left-0 top-1.5 w-[11px] h-[11px] rounded-full border-2 border-amber-400/60 bg-surface-0"></div>
-              <div>
-                <h3 class="font-display text-lg font-semibold text-neutral-100 mb-1">{{ exp.title }}</h3>
-                <p class="text-sm font-mono text-amber-400/70 mb-3">{{ exp.period }}</p>
+              <!-- Timeline dot: filled + glow for current, hollow for past -->
+              <div
+                class="absolute left-0 top-1.5 w-[11px] h-[11px] rounded-full border-2 transition-all"
+                :class="index === 0
+                  ? 'border-amber-400 bg-amber-400 shadow-[0_0_8px_2px_rgba(251,191,36,0.4)]'
+                  : 'border-neutral-600 bg-transparent'"
+              ></div>
+
+              <!-- Card -->
+              <div
+                class="rounded-lg px-5 py-4 transition-colors"
+                :class="index === 0
+                  ? 'bg-amber-400/5 border border-amber-400/20'
+                  : 'bg-gray-800/40 border border-neutral-700/30'"
+              >
+                <!-- Title + Present badge -->
+                <div class="flex items-center gap-3 mb-1 flex-wrap">
+                  <h3 class="font-display text-lg font-semibold text-neutral-100">{{ exp.title }}</h3>
+                  <span
+                    v-if="index === 0"
+                    class="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-400 border border-amber-400/30"
+                  >Present</span>
+                </div>
+                <p class="text-sm font-mono mb-3" :class="index === 0 ? 'text-amber-400/90' : 'text-amber-400/60'">{{ exp.period }}</p>
                 <p v-if="exp.description" class="text-sm text-neutral-400 leading-relaxed">{{ exp.description }}</p>
-                <ul v-if="exp.projects" class="mt-2 space-y-2">
+                <!-- Projects as pills + description -->
+                <ul v-if="exp.projects" class="mt-3 space-y-3">
                   <li v-for="project in exp.projects" :key="project.name" class="text-sm text-neutral-400 leading-relaxed">
-                    <span class="text-neutral-200 font-medium">{{ project.name }}:</span> {{ project.description }}
+                    <span class="inline-block text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-neutral-700/60 text-neutral-300 border border-neutral-600/50 mb-1">{{ project.name }}</span>
+                    <p>{{ project.description }}</p>
                   </li>
                 </ul>
               </div>
@@ -168,12 +189,12 @@ const experiences: Experience[] = [
     color: 'text-amber-400',
     projects: [
       {
-        name: 'Qargo TMS',
-        description: 'Delivering multimodal and container transport integrations for an intelligent TMS platform serving carriers, freight forwarders, and 3PLs across Europe.'
-      },
-      {
         name: 'Multi-Agent Platform',
         description: 'Designing and building a complete Multi-Agent orchestration platform covering the full software development lifecycle.'
+      },
+      {
+        name: 'Qargo TMS',
+        description: 'Delivering multimodal and container transport integrations for an intelligent TMS platform serving carriers, freight forwarders, and 3PLs across Europe.'
       }
     ]
   },
@@ -219,12 +240,12 @@ const experiences: Experience[] = [
     color: 'text-amber-400',
     projects: [
       {
-        name: 'Python Developer',
-        description: "Created tools to automate the visual effects creation process using Python. Some of the tools helped double the artists' speed and enabled significantly more precise work."
-      },
-      {
         name: 'Rotomation Supervisor',
         description: 'Responsible for delegating and quality control across a team of 7. Together successfully delivered many projects, including numerous Hollywood blockbusters.'
+      },
+      {
+        name: 'Python Developer',
+        description: "Created tools to automate the visual effects creation process using Python. Some of the tools helped double the artists' speed and enabled significantly more precise work."
       }
     ]
   },
