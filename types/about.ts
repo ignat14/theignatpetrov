@@ -8,7 +8,8 @@ export interface Experience {
   title: string
   period: string
   color: string
-  description: string
+  description?: string
+  projects?: { name: string; description: string }[]
 }
 
 export interface Value {

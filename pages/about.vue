@@ -87,6 +87,11 @@
                 <h3 class="font-display text-lg font-semibold text-neutral-100 mb-1">{{ exp.title }}</h3>
                 <p class="text-sm font-mono text-amber-400/70 mb-3">{{ exp.period }}</p>
                 <p v-if="exp.description" class="text-sm text-neutral-400 leading-relaxed">{{ exp.description }}</p>
+                <ul v-if="exp.projects" class="mt-2 space-y-2">
+                  <li v-for="project in exp.projects" :key="project.name" class="text-sm text-neutral-400 leading-relaxed">
+                    <span class="text-neutral-200 font-medium">{{ project.name }}:</span> {{ project.description }}
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -158,28 +163,43 @@ const skills: Skill[] = [
 
 const experiences: Experience[] = [
   {
+    title: 'Senior Software Engineer @Damilah',
+    period: 'Sep 2025 - Present',
+    color: 'text-amber-400',
+    projects: [
+      {
+        name: 'Qargo TMS',
+        description: 'Delivering multimodal and container transport integrations for an intelligent TMS platform serving carriers, freight forwarders, and 3PLs across Europe.'
+      },
+      {
+        name: 'Multi-Agent Platform',
+        description: 'Designing and building a complete Multi-Agent orchestration platform covering the full software development lifecycle.'
+      }
+    ]
+  },
+  {
     title: 'Software Engineer @Qogita',
     period: 'May 2022 - June 2025',
     color: 'text-amber-400',
-    description: 'Helped shape the backend of one of the biggest startups in Europe.'
+    description: "Owned backend development on core commerce features like claims, watchlist, multi-currency, cart & checkout flows etc. at one of Europe's fastest-growing B2B wholesale marketplaces. Delivered integrations across shipping, financial, and customer support services, working across a stack that included Django, AWS, Kafka, Airflow, Datadog, Retool, PostgreSQL, MongoDB, and Snowflake."
   },
   {
     title: 'Software Engineer @Iprova',
-    period: 'Aug 2022 - Apr 2022',
+    period: 'Aug 2021 - Apr 2022',
     color: 'text-amber-400',
-    description: ''
+    description: 'Worked on an AI-powered platform that accelerates invention and patent development for enterprises. Optimized indexing services to enable fast search across millions of research paper documents, helping R&D teams quickly discover relevant prior art and insights.'
   },
   {
     title: 'Freelancer @Toptal',
     period: 'Mar 2020 - August 2021',
     color: 'text-amber-400',
-    description: 'Freelancer at Toptal: https://www.toptal.com/resume/ignat-petrov'
+    description: 'Built a document management platform from the ground up for Speos Digital, a subsidiary of Belgian postal service bpost. Developed the full stack using Django and Vue.js, with digital signatures as the core feature alongside document management and organization.'
   },
   {
     title: 'Software Engineer @Komuna.dev',
     period: 'Nov 2018 - Aug 2021',
     color: 'text-amber-400',
-    description: 'Worked on a project for communication and collaboration solutions for business continuity, disaster recovery, crisis communications and operations management. On the back-end always making sure to deliver secure and reliable solutions using Python and Django, communicating with Twilio, Textlocal and MailGun APIs. On the front-end I was responsible for migrating the application from AngularJs to VueJs.'
+    description: 'Built communication and collaboration solutions for business continuity, disaster recovery, and crisis management. Developed secure, reliable back-end services with Python and Django, integrating Twilio, Textlocal, and Mailgun APIs. Led the front-end migration from AngularJS to Vue.js.'
   },
   {
     title: 'Python Lecturer @Semos',
@@ -191,13 +211,22 @@ const experiences: Experience[] = [
     title: 'Software Engineer @Nebiz',
     period: 'Jul 2018 - Nov 2018',
     color: 'text-amber-400',
-    description: 'Created and customized numerous modules for the Python ERP framework Odoo regarding accounting, sales, purchase, inventory work and manufacturing for successful businesses mostly located in Switzerland and Austria'
+    description: 'Created and customized numerous modules for the Python ERP framework Odoo regarding accounting, sales, purchase, inventory work and manufacturing for successful businesses across Europe.'
   },
   {
     title: 'Rotomation Supervisor | Python developer @Vertigo Visual',
     period: 'Sep 2015 - Jun 2018',
     color: 'text-amber-400',
-    description: "As a Python developer I have created many tools which help automate the whole visual effects creation process using Python. Some of the tools I made helped double the artists' speed and more importantly helped for a lot more precise work. As a Rotomation Supervisor I was responsible for delegating and quality control of the work that was done by my team which included 7 members. Together we have successfully finished many projects, including numerous successful Hollywood blockbusters."
+    projects: [
+      {
+        name: 'Python Developer',
+        description: "Created tools to automate the visual effects creation process using Python. Some of the tools helped double the artists' speed and enabled significantly more precise work."
+      },
+      {
+        name: 'Rotomation Supervisor',
+        description: 'Responsible for delegating and quality control across a team of 7. Together successfully delivered many projects, including numerous Hollywood blockbusters.'
+      }
+    ]
   },
 ]
 
