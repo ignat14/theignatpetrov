@@ -58,107 +58,104 @@
         </p>
       </section>
 
-      <!-- Two-column layout -->
-      <div class="grid grid-cols-[1fr_220px] gap-8">
-        <!-- Left column: Experience -->
+      <!-- Sidebar — floated right so experience wraps to full width once it ends -->
+      <aside class="cv-sidebar float-right w-[220px] ml-8 pb-20 space-y-5">
+        <!-- Education -->
         <div>
-          <h2 class="cv-section-title">Experience</h2>
-          <div class="relative ml-3">
-            <!-- Timeline line -->
-            <div class="absolute left-0 top-2 bottom-2 w-px bg-gray-200"></div>
+          <h2 class="cv-section-title">Education</h2>
+          <h3 class="text-[12px] font-bold text-gray-900">Faculty of Computer Science and Engineering</h3>
+          <p class="text-[11px] text-gray-500">University 'Ss. Cyril and Methodious', Skopje, Macedonia</p>
+          <p class="text-[11px] text-gray-400 font-mono">2007 - 2014</p>
+        </div>
 
-            <div v-for="(exp, index) in experiences" :key="exp.title" class="cv-entry relative pl-5 pb-4 last:pb-0">
-              <!-- Timeline dot -->
-              <div
-                class="absolute left-[-3.5px] top-1.5 w-[8px] h-[8px] rounded-full border-2"
-                :class="index === 0 ? 'border-accent bg-accent' : 'border-gray-300 bg-white'"
-              ></div>
-
-              <div class="flex justify-between items-baseline mb-0.5">
-                <h3 class="text-[13px] font-bold text-gray-900">{{ exp.title }}</h3>
-                <span class="text-[11px] text-gray-400 whitespace-nowrap ml-3 font-mono">{{ exp.period }}</span>
-              </div>
-
-              <p v-if="exp.description" class="text-[12px] text-gray-600 leading-relaxed">
-                {{ exp.description }}
-              </p>
-
-              <ul v-if="exp.projects" class="mt-1 space-y-1">
-                <li v-for="project in exp.projects" :key="project.name" class="text-[12px] text-gray-600 leading-relaxed">
-                  <span class="font-semibold text-gray-700">{{ project.name }}:</span> {{ project.description }}
-                </li>
-              </ul>
+        <!-- Internships -->
+        <div>
+          <h2 class="cv-section-title">Internships</h2>
+          <div class="space-y-2">
+            <div>
+              <h3 class="text-[12px] font-bold text-gray-900">Atiode Solar Systems</h3>
+              <p class="text-[11px] text-gray-500">Benin City, Nigeria</p>
+              <p class="text-[11px] text-gray-400 font-mono">Jul 2011 - Sep 2011</p>
+            </div>
+            <div>
+              <h3 class="text-[12px] font-bold text-gray-900">King Mongkut Institute of Technology</h3>
+              <p class="text-[11px] text-gray-500">Bangkok, Thailand</p>
+              <p class="text-[11px] text-gray-400 font-mono">Jul 2010 - Sep 2010</p>
             </div>
           </div>
         </div>
 
-        <!-- Right column: Sidebar -->
-        <div class="space-y-5">
-          <!-- Education -->
-          <div>
-            <h2 class="cv-section-title">Education</h2>
-            <h3 class="text-[12px] font-bold text-gray-900">Faculty of Computer Science and Engineering</h3>
-            <p class="text-[11px] text-gray-500">University 'Ss. Cyril and Methodious', Skopje, Macedonia</p>
-            <p class="text-[11px] text-gray-400 font-mono">2007 - 2014</p>
-          </div>
+        <!-- Volunteer -->
+        <div>
+          <h2 class="cv-section-title">Volunteer</h2>
+          <h3 class="text-[12px] font-bold text-gray-900">IAESTE Macedonia</h3>
+          <p class="text-[11px] text-gray-500">International Association for the Exchange of Students for Technical Experience</p>
+          <p class="text-[11px] text-gray-400 font-mono">2009 - 2012</p>
+        </div>
 
-          <!-- Internships -->
-          <div>
-            <h2 class="cv-section-title">Internships</h2>
-            <div class="space-y-2">
-              <div>
-                <h3 class="text-[12px] font-bold text-gray-900">Atiode Solar Systems</h3>
-                <p class="text-[11px] text-gray-500">Benin City, Nigeria</p>
-                <p class="text-[11px] text-gray-400 font-mono">Jul 2011 - Sep 2011</p>
-              </div>
-              <div>
-                <h3 class="text-[12px] font-bold text-gray-900">King Mongkut Institute of Technology</h3>
-                <p class="text-[11px] text-gray-500">Bangkok, Thailand</p>
-                <p class="text-[11px] text-gray-400 font-mono">Jul 2010 - Sep 2010</p>
-              </div>
+        <!-- Certificates -->
+        <div>
+          <h2 class="cv-section-title">Certificates</h2>
+          <h3 class="text-[12px] font-bold text-gray-900">Business Innovation & Entrepreneurship</h3>
+          <p class="text-[11px] text-gray-500">Southwestern University of Finance and Economics, Chengdu, China</p>
+          <p class="text-[11px] text-gray-400 font-mono">Jul 2017</p>
+        </div>
+
+        <!-- Languages -->
+        <div>
+          <h2 class="cv-section-title">Languages</h2>
+          <div class="space-y-1.5">
+            <div>
+              <span class="text-[12px] font-semibold text-gray-800">Macedonian</span>
+              <span class="text-[11px] text-gray-400 ml-1">Native</span>
             </div>
-          </div>
-
-          <!-- Volunteer -->
-          <div>
-            <h2 class="cv-section-title">Volunteer</h2>
-            <h3 class="text-[12px] font-bold text-gray-900">IAESTE Macedonia</h3>
-            <p class="text-[11px] text-gray-500">International Association for the Exchange of Students for Technical Experience</p>
-            <p class="text-[11px] text-gray-400 font-mono">2009 - 2012</p>
-          </div>
-
-          <!-- Certificates -->
-          <div>
-            <h2 class="cv-section-title">Certificates</h2>
-            <h3 class="text-[12px] font-bold text-gray-900">Business Innovation & Entrepreneurship</h3>
-            <p class="text-[11px] text-gray-500">Southwestern University of Finance and Economics, Chengdu, China</p>
-            <p class="text-[11px] text-gray-400 font-mono">Jul 2017</p>
-          </div>
-
-          <!-- Languages -->
-          <div>
-            <h2 class="cv-section-title">Languages</h2>
-            <div class="space-y-1.5">
-              <div>
-                <span class="text-[12px] font-semibold text-gray-800">Macedonian</span>
-                <span class="text-[11px] text-gray-400 ml-1">Native</span>
-              </div>
-              <div>
-                <span class="text-[12px] font-semibold text-gray-800">English</span>
-                <span class="text-[11px] text-gray-400 ml-1">Full Professional</span>
-              </div>
-              <div>
-                <span class="text-[12px] font-semibold text-gray-800">German</span>
-                <span class="text-[11px] text-gray-400 ml-1">Elementary</span>
-              </div>
-              <div>
-                <span class="text-[12px] font-semibold text-gray-800">Greek</span>
-                <span class="text-[11px] text-gray-400 ml-1">Elementary</span>
-              </div>
+            <div>
+              <span class="text-[12px] font-semibold text-gray-800">English</span>
+              <span class="text-[11px] text-gray-400 ml-1">Full Professional</span>
+            </div>
+            <div>
+              <span class="text-[12px] font-semibold text-gray-800">German</span>
+              <span class="text-[11px] text-gray-400 ml-1">Elementary</span>
+            </div>
+            <div>
+              <span class="text-[12px] font-semibold text-gray-800">Greek</span>
+              <span class="text-[11px] text-gray-400 ml-1">Elementary</span>
             </div>
           </div>
         </div>
-      </div>
+      </aside>
+
+      <!-- Experience — wraps around sidebar, goes full-width once sidebar ends -->
+      <section>
+        <h2 class="cv-section-title">Experience</h2>
+        <div class="relative ml-3">
+          <!-- Timeline line -->
+          <div class="absolute left-0 top-2 bottom-2 w-px bg-gray-200"></div>
+
+          <div v-for="(exp, index) in experiences" :key="exp.title" class="cv-entry relative pl-5 pb-4 last:pb-0">
+            <!-- Timeline dot -->
+            <div
+              class="absolute left-[-3.5px] top-1.5 w-[8px] h-[8px] rounded-full border-2"
+              :class="index === 0 ? 'border-accent bg-accent' : 'border-gray-300 bg-white'"
+            ></div>
+
+            <div class="flex justify-between items-baseline mb-0.5">
+              <h3 class="text-[13px] font-bold text-gray-900">{{ exp.title }}</h3>
+              <span class="text-[11px] text-gray-400 whitespace-nowrap ml-3 font-mono">{{ exp.period }}</span>
+            </div>
+
+            <p v-if="exp.description" class="text-[12px] text-gray-600 leading-relaxed">
+              {{ exp.description }}
+            </p>
+
+            <ul v-if="exp.projects" class="mt-1 space-y-1">
+              <li v-for="project in exp.projects" :key="project.name" class="text-[12px] text-gray-600 leading-relaxed">
+                <span class="font-semibold text-gray-700">{{ project.name }}:</span> {{ project.description }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </template>
