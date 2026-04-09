@@ -150,9 +150,10 @@
               {{ exp.description }}
             </p>
 
-            <ul v-if="exp.projects" class="mt-1 space-y-1">
-              <li v-for="project in exp.projects" :key="project.name" class="text-[12px] text-gray-600 leading-relaxed">
-                <span class="font-semibold text-gray-700">{{ project.name }}:</span> {{ project.description }}
+            <ul v-if="exp.projects" class="mt-2 space-y-2">
+              <li v-for="project in exp.projects" :key="project.name" class="text-[12px] text-gray-600 leading-relaxed pl-3 border-l border-gray-200">
+                <p class="font-semibold text-gray-800 text-[12px] mb-0.5">{{ project.name }}</p>
+                <p>{{ project.description }}</p>
               </li>
             </ul>
           </div>
