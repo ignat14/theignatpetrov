@@ -29,14 +29,14 @@
             <h2 class="font-display text-2xl sm:text-3xl font-bold text-neutral-100 mb-6">Hi, I'm Ignat</h2>
             <div class="space-y-5 text-neutral-400 leading-relaxed">
               <p>
-                I'm a passionate software engineer with 10 years of experience building
+                I'm a passionate software engineer with extensive experience building
                 scalable web applications. My journey in tech
                 actually started working at a VFX studio, and has evolved into a career
-                focused on creating meaningful software solutions.
+                focused on designing and building meaningful software products.
               </p>
               <p>
                 I'm currently transitioning into solopreneurship, and I'm always looking for new challenges.
-                My plan is to use my skills and experience to start building some cool stuff.
+                My plan is to use my skills and experience to start building useful, thoughtful, and genuinely cool things.
               </p>
               <p>
                 When I'm not coding, I'm usually spending time with my family, reading books, or playing basketball.
@@ -190,7 +190,7 @@ const experiences: Experience[] = [
     projects: [
       {
         name: 'Multi-Agent Platform',
-        description: 'Designing and building a complete Multi-Agent orchestration platform covering the full software development lifecycle.'
+        description: 'Designed the architecture and led implementation of a multi-agent orchestration platform for AI-driven workflows. Built a scalable system using React, FastAPI, Redis, Postgres, and sandboxed code execution, integrating multiple LLM providers and external services. Implemented fault-tolerant, resumable long-running workflows with persisted execution context for reliable recovery after failures. Drove technical direction through RFCs, PoCs, and architecture planning, reducing ambiguity in a complex, fast-evolving problem space.'
       },
       {
         name: 'Qargo TMS',
@@ -202,7 +202,25 @@ const experiences: Experience[] = [
     title: 'Software Engineer @Qogita',
     period: 'May 2022 - June 2025',
     color: 'text-amber-400',
-    description: "Owned backend development on core commerce features like claims, watchlist, multi-currency, cart & checkout flows etc. at one of Europe's fastest-growing B2B wholesale marketplaces. Delivered integrations across shipping, financial, and customer support services, working across a stack that included Django, AWS, Kafka, Airflow, Datadog, Retool, PostgreSQL, MongoDB, and Snowflake."
+    description: 'Led backend development for core commerce and operational workflows at Qogita, a fast-growing European B2B wholesale marketplace, supporting high-complexity cross-border pricing, ordering, logistics, and post-order workflows. Key projects:',
+    projects: [
+      {
+        name: 'Cart & Order Migration',
+        description: 'Led a zero-downtime migration from a shared cart/order model to separate domain entities, reducing system-wide complexity and enabling accurate handling of cases where final orders differed from carts due to country-specific minimum order value (MoV) rules.'
+      },
+      {
+        name: 'Pricing Service',
+        description: 'Helped evolve a complex SQL-heavy pricing pipeline into a dedicated pricing service, collaborating with Data Science on a pandas-based solution for pricing and MoV calculations, and integrating it into the platform\'s event-driven architecture (SQS → Kafka). Designed downstream consumers to refresh indexes, update open cart prices, and notify watchlisted users.'
+      },
+      {
+        name: 'DPD Shipping Integration',
+        description: 'Led the DPD shipping integration, designing a strategy-based abstraction over fragmented country-specific APIs that reduced shipping costs and expanded support for dangerous goods across more markets.'
+      },
+      {
+        name: 'Claims Platform',
+        description: 'Led the initial backend implementation of an automated claims platform, replacing a manual email-based process with a structured workflow for claim submission, evidence collection, partial/full approvals, refunds, and support visibility.'
+      }
+    ]
   },
   {
     title: 'Software Engineer @Iprova',
