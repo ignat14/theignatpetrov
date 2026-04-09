@@ -130,17 +130,19 @@
         <h2 class="cv-section-title">Experience</h2>
         <div class="relative ml-3">
           <!-- Timeline line -->
-          <div class="absolute left-0 top-2 bottom-2 w-px bg-gray-200"></div>
+          <div class="absolute left-0 top-2 bottom-2 w-px bg-accent/20"></div>
 
           <div v-for="(exp, index) in experiences" :key="exp.title" class="cv-entry relative pl-5 pb-4 last:pb-0">
             <!-- Timeline dot -->
             <div
               class="absolute left-[-3.5px] top-1.5 w-[8px] h-[8px] rounded-full border-2"
-              :class="index === 0 ? 'border-accent bg-accent' : 'border-gray-300 bg-white'"
+              :class="index === 0 ? 'border-accent bg-accent' : 'border-accent/40 bg-white'"
             ></div>
 
             <div class="flex justify-between items-baseline mb-0.5">
-              <h3 class="text-[13px] font-bold text-gray-900">{{ exp.title }}</h3>
+              <h3 class="text-[13px] font-bold text-gray-900">
+                {{ exp.title.split('@')[0] }}<span class="text-accent">@{{ exp.title.split('@')[1] }}</span>
+              </h3>
               <span class="text-[11px] text-gray-400 whitespace-nowrap ml-3 font-mono">{{ exp.period }}</span>
             </div>
 
