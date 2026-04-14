@@ -150,8 +150,8 @@
               {{ exp.description }}
             </p>
 
-            <ul v-if="exp.projects" class="mt-2 space-y-2">
-              <li v-for="project in exp.projects" :key="project.name" class="text-[12px] text-gray-600 leading-relaxed pl-3 border-l border-gray-200">
+            <ul v-if="exp.projects" class="mt-2 space-y-3">
+              <li v-for="project in exp.projects" :key="project.name" class="cv-bracket text-[12px] text-gray-600 leading-relaxed ml-2 pl-3 border-l border-gray-200 py-1 relative">
                 <p class="font-semibold text-gray-800 text-[12px] mb-0.5">{{ project.name }}</p>
                 <p>{{ project.description }}</p>
               </li>
@@ -180,6 +180,25 @@ function printCV(): void {
 </script>
 
 <style scoped>
+/* Bracket: short horizontal ticks at top and bottom */
+.cv-bracket::before,
+.cv-bracket::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  width: 8px;
+  height: 1px;
+  background: #e5e5e5;
+}
+
+.cv-bracket::before {
+  top: 0;
+}
+
+.cv-bracket::after {
+  bottom: 0;
+}
+
 .text-accent {
   color: #d97706;
 }
