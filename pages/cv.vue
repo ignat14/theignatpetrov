@@ -249,6 +249,19 @@ function printCV(): void {
     break-inside: avoid;
   }
 
+  .cv-bracket::before,
+  .cv-bracket::after {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #e5e5e5 !important;
+  }
+
+  .cv-bracket {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    border-left: 1px solid #e5e5e5 !important;
+  }
+
   @page {
     size: A4;
     margin: 12mm 15mm;
