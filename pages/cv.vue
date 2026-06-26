@@ -58,6 +58,23 @@
         </p>
       </section>
 
+      <!-- Projects -->
+      <section class="mb-5">
+        <h2 class="cv-section-title">Projects</h2>
+        <div class="flex justify-between items-baseline mb-0.5">
+          <h3 class="text-[13px] font-bold text-gray-900">
+            Switchbox <span class="text-accent">— Feature flags served from a CDN</span>
+          </h3>
+          <span class="text-[11px] text-gray-400 whitespace-nowrap ml-3 font-mono">switchbox.dev</span>
+        </div>
+        <p class="text-[12px] text-gray-600 leading-relaxed">
+          Open source, CDN-first feature flag service. Manage flags, rollout percentages, and targeting rules
+          from a dashboard; configs publish as static JSON to the edge. The zero-dependency Python SDK evaluates
+          rules locally in sub-millisecond time with no server in the read path.
+          Built with Python, FastAPI, React, TypeScript, PostgreSQL, Docker, and AWS S3.
+        </p>
+      </section>
+
       <!-- Sidebar — floated right so experience wraps to full width once it ends -->
       <aside class="cv-sidebar float-right w-[220px] ml-8 pb-20 space-y-5">
         <!-- Education -->
