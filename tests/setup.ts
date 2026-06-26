@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 
-// Mock global window object for SSR compatibility tests
+// Mock global window object for SSR compatibility tests.
 Object.defineProperty(window, 'localStorage', {
   value: {
     getItem: vi.fn(),
